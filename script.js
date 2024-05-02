@@ -14,145 +14,176 @@ document.addEventListener("DOMContentLoaded", function () {
     return length;
   }
   function getVectorDistance(a, b) {
-    const distance = getVectorLength(offsetVector(a, b));
-    return distance;
+    return getVectorLength(offsetVector(a, b));
   }
   function normaliseVector(v) {
     const length = getVectorLength(v);
     return { x: v.x / length, y: v.y / length };
   }
 
-  // VARIABLES
+  // CLASSES
 
-  const player = {
-    x: 50,
-    y: 50,
-    vx: 0,
-    vy: 0,
-    ax: 0,
-    ay: 0,
-    deceleration: 0.95,
-    width: 20,
-    height: 20,
-    color: "cyan",
-    speed: 0.5,
-  };
+  class Character {
+    constructor({
+      name,
+      health,
+      position,
+      velocity,
+      acceleration,
+      deceleration,
+      speed,
+      width,
+      height,
+      color,
+    }) {
+      this.name = name;
+      this.health = health;
+      this.position = position;
+      this.velocity = velocity;
+      this.acceleration = acceleration;
+      this.deceleration = deceleration;
+      this.speed = speed;
+      this.width = width;
+      this.height = height;
+      this.color = color;
+    }
+    update() {
+      this.draw();
+      this.move();
+      this.checkBoundaries();
+    }
+
+    move() {
+      this.velocity.x += this.acceleration.x;
+      this.velocity.y += this.acceleration.y;
+
+      this.velocity.x *= this.deceleration;
+      this.velocity.y *= this.deceleration;
+
+      this.position.x += this.velocity.x;
+      this.position.y += this.velocity.y;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.arc(
+        this.position.x + this.width / 2,
+        this.position.y + this.height / 2,
+        this.width / 2,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+    }
+    checkBoundaries() {
+      if (this.position.x < 0) {
+        this.position.x = 0;
+      } else if (this.position.x + this.width > canvas.width) {
+        this.position.x = canvas.width - this.width;
+      }
+      if (this.position.y < 0) {
+        this.position.y = 0;
+      } else if (this.position.y + this.height > canvas.height) {
+        this.position.y = canvas.height - this.height;
+      }
+    }
+  }
+
+  class Player extends Character {
+    constructor({ name, position }) {
+      super({
+        name: name,
+        health: 100,
+        position: position,
+        velocity: { x: 0, y: 0 },
+        acceleration: { x: 0, y: 0 },
+        deceleration: 0.95,
+        speed: 0.5,
+        width: 20,
+        height: 20,
+        color: "cyan",
+      });
+    }
+  }
+
+  class Enemy extends Character {
+    constructor({ name, health, position, speed, width, height, color }) {
+      super({
+        name: name,
+        health: health,
+        position: position,
+        velocity: { x: 0, y: 0 },
+        acceleration: { x: 0, y: 0 },
+        deceleration: 0.95,
+        speed: speed,
+        width: width,
+        height: height,
+        color: color,
+      });
+    }
+    update() {
+      super.update();
+      console.log(getVectorDistance(this.position, player.position));
+      if (getVectorDistance(this.position, player.position) < 50) {
+        this.attack();
+      }
+
+      if (getVectorDistance(this.position, player.position) < 200) {
+        this.moveToPlayer();
+      }
+    }
+    attack() {
+      ctx.strokeStyle = "red";
+      ctx.beginPath();
+      ctx.moveTo(
+        this.position.x + this.width / 2,
+        this.position.y + this.height / 2
+      );
+      ctx.lineTo(
+        player.position.x + player.width / 2,
+        player.position.y + player.height / 2
+      );
+      ctx.stroke();
+    }
+    moveToPlayer() {
+      const directionVector = offsetVector(player.position, this.position);
+      const normalisedVector = normaliseVector(directionVector);
+
+      this.velocity.x = normalisedVector.x * this.speed;
+      this.velocity.y = normalisedVector.y * this.speed;
+    }
+  }
+
+  const player = new Player({ name: "player", position: { x: 100, y: 100 } });
   const enemies = [
-    {
-      x: 200,
-      y: 300,
-      vx: 0,
-      vy: 0,
-      ax: 0,
-      ay: 0,
-      deceleration: 0.95,
+    new Enemy({
+      name: "enemy",
+      health: 100,
+      position: { x: 200, y: 200 },
+      speed: 0.5,
       width: 20,
       height: 20,
-      color: "blue",
-      speed: 2,
-    },
+      color: "green",
+    }),
+    new Enemy({
+      name: "enemy",
+      health: 100,
+      position: { x: 300, y: 300 },
+      speed: 0.5,
+      width: 20,
+      height: 20,
+      color: "red",
+    }),
+    new Enemy({
+      name: "enemy",
+      health: 100,
+      position: { x: 500, y: 600 },
+      speed: 0.5,
+      width: 20,
+      height: 20,
+      color: "orange",
+    }),
   ];
-
-  // PLAYER FUNCTIONS
-
-  function drawPlayer() {
-    ctx.beginPath();
-    ctx.fillStyle = player.color;
-    ctx.arc(
-      player.x + player.width / 2,
-      player.y + player.height / 2,
-      player.width / 2,
-      0,
-      2 * Math.PI
-    );
-    ctx.fill();
-    ctx.closePath();
-  }
-  function updatePlayer() {
-    drawPlayer();
-    player.vx += player.ax;
-    player.vy += player.ay;
-
-    player.vx *= player.deceleration;
-    player.vy *= player.deceleration;
-
-    player.x += player.vx;
-    player.y += player.vy;
-  }
-
-  // ENEMY FUNCTIONS
-
-  function enemyAttack(enemy) {
-    player.color = "red";
-    ctx.strokeStyle = "red";
-    ctx.beginPath();
-    ctx.moveTo(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2);
-    ctx.lineTo(player.x + player.width / 2, player.y + player.height / 2);
-    ctx.stroke();
-  }
-  function updateEnemies() {
-    enemies.forEach(function (enemy) {
-      const distance = getVectorDistance(player, enemy);
-
-      drawEnemy(enemy);
-      moveEnemy(enemy);
-      checkBoundariesEnemes(enemy);
-
-      if (distance < 50) {
-        enemyAttack(enemy);
-      } else {
-        player.color = "cyan";
-      }
-
-      if (distance < 200) {
-        moveEnemy(enemy);
-      } else {
-        enemy.vx = 0;
-        enemy.vy = 0;
-      }
-
-      enemy.vx += enemy.ax;
-      enemy.vy += enemy.ay;
-
-      enemy.vx *= enemy.deceleration;
-      enemy.vy *= enemy.deceleration;
-
-      enemy.x += enemy.vx;
-      enemy.y += enemy.vy;
-    });
-  }
-  function drawEnemy(enemy) {
-    ctx.beginPath();
-    ctx.fillStyle = enemy.color;
-    ctx.arc(
-      enemy.x + enemy.width / 2,
-      enemy.y + enemy.height / 2,
-      enemy.width / 2,
-      0,
-      2 * Math.PI
-    );
-    ctx.fill();
-    ctx.closePath();
-  }
-  function moveEnemy(enemy) {
-    const directionVector = offsetVector(player, enemy);
-    const normalisedVector = normaliseVector(directionVector);
-
-    enemy.vx = normalisedVector.x * enemy.speed;
-    enemy.vy = normalisedVector.y * enemy.speed;
-  }
-  function checkBoundariesEnemes(enemy) {
-    if (enemy.x < 0) {
-      enemy.x = 0;
-    } else if (enemy.x + enemy.width > canvas.width) {
-      enemy.x = canvas.width - enemy.width;
-    }
-    if (enemy.y < 0) {
-      enemy.y = 0;
-    } else if (enemy.y + enemy.height > canvas.height) {
-      enemy.y = canvas.height - enemy.height;
-    }
-  }
 
   // KEYS
   const keys = {
@@ -223,25 +254,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function checkKeys() {
     if (keys.left) {
-      player.ax = -player.speed;
+      player.acceleration.x = -player.speed;
     } else if (keys.right) {
-      player.ax = player.speed;
+      player.acceleration.x = player.speed;
     } else {
-      player.ax = 0;
+      player.acceleration.x = 0;
     }
     if (keys.up) {
-      player.ay = -player.speed;
+      player.acceleration.y = -player.speed;
     } else if (keys.down) {
-      player.ay = player.speed;
+      player.acceleration.y = player.speed;
     } else {
-      player.ay = 0;
+      player.acceleration.y = 0;
     }
   }
 
+  function debug() {}
+
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updateEnemies();
-    updatePlayer();
+    enemies.forEach((enemy) => {
+      enemy.update();
+    });
+    player.update();
+
+    debug();
     checkKeys();
     requestAnimationFrame(animate);
   }
