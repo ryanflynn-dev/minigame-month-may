@@ -155,35 +155,43 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   const player = new Player({ name: "player", position: { x: 100, y: 100 } });
-  const enemies = [
-    new Enemy({
-      name: "enemy",
-      health: 100,
-      position: { x: 200, y: 200 },
-      speed: 0.5,
-      width: 20,
-      height: 20,
-      color: "green",
-    }),
-    new Enemy({
-      name: "enemy",
-      health: 100,
-      position: { x: 300, y: 300 },
-      speed: 0.5,
-      width: 20,
-      height: 20,
-      color: "red",
-    }),
-    new Enemy({
-      name: "enemy",
-      health: 100,
-      position: { x: 500, y: 600 },
-      speed: 0.5,
-      width: 20,
-      height: 20,
-      color: "orange",
-    }),
-  ];
+  const enemies = [];
+
+  // FUNCTIONS
+
+  function randomEnemyGenerator() {
+    const randomX = Math.random() * canvas.width;
+    const randomY = Math.random() * canvas.height;
+    const colors = [
+      "red",
+      "green",
+      "blue",
+      "yellow",
+      "purple",
+      "orange",
+      "magenta",
+      "white",
+      "black",
+    ];
+    enemies.push(
+      new Enemy({
+        name: "enemy",
+        health: 100,
+        position: { x: randomX, y: randomY },
+        speed: 0.5,
+        width: 20,
+        height: 20,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      })
+    );
+  }
+
+  function setAmountOfEnemies() {
+    enemies.length = 0;
+    for (let i = 0; i < 1000; i++) {
+      randomEnemyGenerator();
+    }
+  }
 
   // KEYS
   const keys = {
@@ -283,5 +291,10 @@ document.addEventListener("DOMContentLoaded", function () {
     requestAnimationFrame(animate);
   }
 
-  animate();
+  function gameInit() {
+    setAmountOfEnemies();
+    animate();
+  }
+
+  gameInit();
 });
