@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
       this.position.x += this.velocity.x;
       this.position.y += this.velocity.y;
     }
+
     draw() {
       ctx.beginPath();
       ctx.fillStyle = this.color;
@@ -103,6 +104,60 @@ document.addEventListener("DOMContentLoaded", function () {
         height: 20,
         color: "cyan",
       });
+      this.bullets = [];
+    }
+
+    update() {
+      super.update();
+      this.bulletUpdate();
+    }
+
+    bulletUpdate() {
+      for (let i = 0; i < this.bullets.length; i++) {
+        const bullet = this.bullets[i];
+        ctx.fillStyle = bullet.color;
+        ctx.beginPath();
+        ctx.arc(
+          bullet.position.x + bullet.width / 2,
+          bullet.position.y + bullet.height / 2,
+          bullet.width / 2,
+          0,
+          2 * Math.PI
+        );
+        ctx.fill();
+        ctx.closePath();
+
+        bullet.position.x += bullet.velocity.x * bullet.speed;
+        bullet.position.y += bullet.velocity.y * bullet.speed;
+        bullet.lifespan -= 1;
+        if (bullet.lifespan < 0) {
+          this.removeBullet(i);
+        }
+      }
+    }
+    shoot(mousePosition) {
+      const direction = offsetVector(mousePosition, this.position);
+      const normalisedVector = normaliseVector(direction);
+
+      const bullet = {
+        name: "bullet",
+        position: {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height / 2,
+        },
+        velocity: { x: normalisedVector.x * 10, y: normalisedVector.y * 10 },
+        acceleration: { x: 0, y: 0 },
+        color: "red",
+        width: 5,
+        height: 5,
+        lifespan: 100,
+        speed: 0.5,
+      };
+      this.bullets.push(bullet);
+    }
+
+    removeBullet(index) {
+      this.bullets.splice(index, 1);
     }
   }
 
@@ -123,7 +178,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     update() {
       super.update();
-      console.log(getVectorDistance(this.position, player.position));
       if (getVectorDistance(this.position, player.position) < 50) {
         this.attack();
       }
@@ -188,12 +242,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function setAmountOfEnemies() {
     enemies.length = 0;
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       randomEnemyGenerator();
     }
   }
 
-  // KEYS
+  function getMousePos(canvas, e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+  }
+
+  // CONTROLS
+
+  document.addEventListener("click", function (e) {
+    mousePos = getMousePos(canvas, e);
+    player.shoot(mousePos);
+  });
+
   const keys = {
     left: false,
     right: false,
@@ -276,6 +344,8 @@ document.addEventListener("DOMContentLoaded", function () {
       player.acceleration.y = 0;
     }
   }
+
+  // GAME LOOP
 
   function debug() {}
 
