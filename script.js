@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let lasttime = 0;
   let score = 0;
   let highScore = 0;
+  let enemyLength = 1;
 
   // MOUSE POINTER
   const targetIcon = new Image();
@@ -438,7 +439,8 @@ document.addEventListener("DOMContentLoaded", function () {
     debug();
     checkKeys();
     if (enemies.length < 1) {
-      setAmountOfEnemies(10);
+      enemyLength += 1;
+      setAmountOfEnemies(enemyLength);
     }
     if (player.health <= 0) {
       alert("GAME OVER");
