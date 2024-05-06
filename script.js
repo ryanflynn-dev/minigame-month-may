@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
   canvas.width = 1280;
   canvas.height = 720;
   let lasttime = 0;
+  let score = 0;
+  let highScore = 0;
 
   // MOUSE POINTER
   const targetIcon = new Image();
@@ -236,6 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (this.health <= 0) {
         enemies.splice(enemies.indexOf(this), 1);
+        score += 1;
       }
     }
     attack() {
@@ -399,6 +402,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // GAME LOOP
 
+  function showScore() {
+    ctx.fillStyle = "black";
+    ctx.font = "30px Impact";
+    ctx.fillText("Score: " + score, 12, 32);
+    ctx.fillStyle = "white";
+    ctx.font = "30px Impact";
+    ctx.fillText("Score: " + score, 10, 30);
+  }
+
+  function showHighScore() {
+    ctx.fillStyle = "black";
+    ctx.font = "30px Impact";
+    ctx.fillText("High Score: " + highScore, 12, 62);
+    ctx.fillStyle = "white";
+    ctx.font = "30px Impact";
+    ctx.fillText("High Score: " + highScore, 10, 60);
+  }
+
   function debug() {
     const debug = console.log;
     debug("player", player.health);
@@ -412,15 +433,16 @@ document.addEventListener("DOMContentLoaded", function () {
       enemy.update(deltatime);
     });
     player.update(deltatime);
-
+    showScore();
+    showHighScore();
     debug();
     checkKeys();
     if (enemies.length < 1) {
       setAmountOfEnemies(10);
     }
     if (player.health <= 0) {
-      // add game over conditions here
       alert("GAME OVER");
+      resetGame();
     }
     requestAnimationFrame(animate);
   }
@@ -428,6 +450,15 @@ document.addEventListener("DOMContentLoaded", function () {
   function gameInit() {
     setAmountOfEnemies();
     animate(0);
+  }
+
+  function resetGame() {
+    player.health = 100;
+    enemies.length = 0;
+    highScore = Math.max(highScore, score);
+    score = 0;
+    setAmountOfEnemies();
+    gameInit();
   }
 
   gameInit();
