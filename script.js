@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   canvas.width = 1280;
   canvas.height = 720;
+  let lasttime = 0;
 
   // MOUSE POINTER
   const targetIcon = new Image();
@@ -49,6 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
       width,
       height,
       color,
+      damage,
+      damagePlus,
     }) {
       this.name = name;
       this.health = health;
@@ -60,22 +63,21 @@ document.addEventListener("DOMContentLoaded", function () {
       this.width = width;
       this.height = height;
       this.color = color;
+      this.damage = damage;
+      this.damagePlus = damagePlus;
     }
-    update() {
+    update(deltatime) {
       this.draw();
-      this.move();
       this.checkBoundaries();
-    }
 
-    move() {
-      this.velocity.x += this.acceleration.x;
-      this.velocity.y += this.acceleration.y;
+      this.velocity.x += this.acceleration.x * this.speed;
+      this.velocity.y += this.acceleration.y * this.speed;
 
       this.velocity.x *= this.deceleration;
       this.velocity.y *= this.deceleration;
 
-      this.position.x += this.velocity.x;
-      this.position.y += this.velocity.y;
+      this.position.x += this.velocity.x * deltatime;
+      this.position.y += this.velocity.y * deltatime;
     }
 
     draw() {
@@ -102,6 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
         this.position.y = canvas.height - this.height;
       }
     }
+    takeDamage(damage) {
+      this.health -= damage;
+    }
   }
 
   class Player extends Character {
@@ -113,21 +118,24 @@ document.addEventListener("DOMContentLoaded", function () {
         velocity: { x: 0, y: 0 },
         acceleration: { x: 0, y: 0 },
         deceleration: 0.95,
-        speed: 0.5,
+        speed: 5,
         width: 20,
         height: 20,
         color: "cyan",
+        damage: 10,
+        damagePlus: 10,
       });
       this.bullets = [];
     }
 
-    update() {
-      super.update();
-      this.bulletUpdate();
+    update(deltatime) {
+      super.update(deltatime);
+      this.bulletUpdate(deltatime);
     }
 
-    bulletUpdate() {
+    bulletUpdate(deltatime) {
       for (let i = 0; i < this.bullets.length; i++) {
+        const bulletDamage = Math.random() * this.damage + this.damagePlus;
         const bullet = this.bullets[i];
         ctx.fillStyle = bullet.color;
         ctx.beginPath();
@@ -141,9 +149,9 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.fill();
         ctx.closePath();
 
-        bullet.position.x += bullet.velocity.x * bullet.speed;
-        bullet.position.y += bullet.velocity.y * bullet.speed;
-        bullet.lifespan -= 1;
+        bullet.position.x += bullet.velocity.x * bullet.speed * deltatime;
+        bullet.position.y += bullet.velocity.y * bullet.speed * deltatime;
+        bullet.lifespan -= 1 * deltatime;
         if (bullet.lifespan < 0) {
           this.removeBullet(i);
         }
@@ -161,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
               }
             );
             if (distance <= bullet.width / 2 + enemy.width / 2) {
-              enemy.health -= 10;
+              enemy.takeDamage(bulletDamage);
               this.removeBullet(i);
             }
           }
@@ -186,8 +194,8 @@ document.addEventListener("DOMContentLoaded", function () {
         color: "red",
         width: 5,
         height: 5,
-        lifespan: 100,
-        speed: 0.5,
+        lifespan: 1000,
+        speed: 50,
       };
       this.bullets.push(bullet);
     }
@@ -210,15 +218,19 @@ document.addEventListener("DOMContentLoaded", function () {
         width: width,
         height: height,
         color: color,
+        damage: 0.1,
+        damagePlus: 0.4,
       });
     }
-    update() {
-      super.update();
+    update(deltatime) {
+      super.update(deltatime);
       if (getVectorDistance(this.position, player.position) < 50) {
+        const hitDamage = Math.random() * this.damage + this.damagePlus;
         this.attack();
+        player.takeDamage(hitDamage);
       }
 
-      if (getVectorDistance(this.position, player.position) < 200) {
+      if (getVectorDistance(this.position, player.position) < 300) {
         this.moveToPlayer();
       }
 
@@ -272,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
         name: "enemy",
         health: 100,
         position: { x: randomX, y: randomY },
-        speed: 0.5,
+        speed: Math.random() * 30 + 20,
         width: 20,
         height: 20,
         color: colors[Math.floor(Math.random() * colors.length)],
@@ -298,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // CONTROLS
 
   document.addEventListener("click", function (e) {
-    mousePos = getMousePos(canvas, e);
+    const mousePos = getMousePos(canvas, e);
     player.shoot(mousePos);
   });
 
@@ -392,24 +404,30 @@ document.addEventListener("DOMContentLoaded", function () {
     debug("player", player.health);
   }
 
-  function animate() {
+  function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let deltatime = (timestamp - lasttime) / 1000;
+    lasttime = timestamp;
     enemies.forEach((enemy) => {
-      enemy.update();
+      enemy.update(deltatime);
     });
-    player.update();
+    player.update(deltatime);
 
     debug();
     checkKeys();
     if (enemies.length < 1) {
       setAmountOfEnemies(10);
     }
+    if (player.health <= 0) {
+      // add game over conditions here
+      alert("GAME OVER");
+    }
     requestAnimationFrame(animate);
   }
 
   function gameInit() {
     setAmountOfEnemies();
-    animate();
+    animate(0);
   }
 
   gameInit();
