@@ -17,11 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let highScore = 0;
   let enemyLength = 1;
 
-  // MOUSE POINTER
-  const targetIcon = new Image();
-  targetIcon.src = "./assets/target.png";
-  mousepointer = targetIcon;
-
   //UTILS
   function offsetVector(a, b) {
     const offset = { x: a.x - b.x, y: a.y - b.y };
@@ -197,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
         color: "red",
         width: 5,
         height: 5,
-        lifespan: 1000,
+        lifespan: 1,
         speed: 50,
       };
       this.bullets.push(bullet);
