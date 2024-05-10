@@ -1,6 +1,6 @@
 /**
  * A mapping of keys current pressed
- * @typedef {{left: boolean, up: sboolean, right: boolean, down: boolean}} keyCodes
+ * @typedef {{left: boolean, up: boolean, right: boolean, down: boolean}} keyCodes
  */
 const controls = {
     left: false,
