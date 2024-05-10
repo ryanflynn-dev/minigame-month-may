@@ -1,7 +1,7 @@
 # minigame-month-may
  
 ## Getting started
-1. Instal prefered HTTP server. E.g. [NPM HTTP server](https://www.npmjs.com/package/http-server)
+1. Install preferred HTTP server. E.g. [NPM HTTP server](https://www.npmjs.com/package/http-server)
 
    ```shell
    npm install --global http-server
