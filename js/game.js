@@ -12,8 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
     canvas.classList.remove("canvas-shoot");
   });
 
-  initControls()
-
   canvas.width = 1280;
   canvas.height = 720;
   let lasttime = 0;
@@ -384,6 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function gameInit() {
+    initControls()
     setAmountOfEnemies();
     animate(0);
   }
