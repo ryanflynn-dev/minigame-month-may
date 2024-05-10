@@ -1,19 +1,4 @@
 /**
- * A mapping of key codes to intendedc function
- * @typedef {{left: number, up: number, right: number, down: number, a: number, d: number, s: number, w: number}} keyCodes
- */
-const keyCodes = {
-    left: 37,
-    up: 38,
-    right: 39,
-    down: 40,
-    a: 65,
-    d: 68,
-    s: 83,
-    w: 87,
-}
-
-/**
  * A mapping of keys current pressed
  * @typedef {{left: boolean, up: sboolean, right: boolean, down: boolean}} keyCodes
  */
@@ -35,20 +20,20 @@ const controls = {
 const handleControlInput = (e, toggle) => {
     e.preventDefault();
     switch (e.code) {
-      case keyCodes.left: 
-      case keyCodes.a: 
+      case "ArrowLeft": 
+      case "KeyA": 
         controls.left = toggle;
         break;
-      case keyCodes.right: 
-      case keyCodes.d: 
+      case "ArrowRight": 
+      case "KeyD": 
         controls.right = toggle;
         break;
-      case keyCodes.up: 
-      case keyCodes.w: 
+      case "ArrowUp": 
+      case "KeyW": 
         controls.up = toggle;
         break;
-      case keyCodes.down: 
-      case keyCodes.s: 
+      case "ArrowDown": 
+      case "KeyS": 
         controls.down = toggle;
         break;
     }
