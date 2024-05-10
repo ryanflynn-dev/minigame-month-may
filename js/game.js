@@ -1,3 +1,5 @@
+import { initControls, getControls } from "./core/control.js";
+
 document.addEventListener("DOMContentLoaded", function () {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
@@ -313,73 +315,8 @@ document.addEventListener("DOMContentLoaded", function () {
     player.shoot(mousePos);
   });
 
-  const keys = {
-    left: false,
-    right: false,
-    up: false,
-    down: false,
-  };
-
-  document.addEventListener("keydown", function movePlayer(e) {
-    e.preventDefault();
-    switch (e.keyCode) {
-      case 37: // Left
-        keys.left = true;
-        break;
-      case 65: // Left
-        keys.left = true;
-        break;
-      case 39: // Right
-        keys.right = true;
-        break;
-      case 68: // Right
-        keys.right = true;
-        break;
-      case 38: // Up
-        keys.up = true;
-        break;
-      case 87: // Up
-        keys.up = true;
-        break;
-      case 83: // Down
-        keys.down = true;
-        break;
-      case 40: // Down
-        keys.down = true;
-        break;
-    }
-  });
-
-  document.addEventListener("keyup", function stopPlayer(e) {
-    switch (e.keyCode) {
-      case 37: // Left
-        keys.left = false;
-        break;
-      case 65: // Left
-        keys.left = false;
-        break;
-      case 39: // Right
-        keys.right = false;
-        break;
-      case 68: // Right
-        keys.right = false;
-        break;
-      case 38: // Up
-        keys.up = false;
-        break;
-      case 87: // Up
-        keys.up = false;
-        break;
-      case 83: // Down
-        keys.down = false;
-        break;
-      case 40: // Down
-        keys.down = false;
-        break;
-    }
-  });
-
   function checkKeys() {
+    const keys = getControls()
     if (keys.left) {
       player.acceleration.x = -player.speed;
     } else if (keys.right) {
@@ -445,6 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function gameInit() {
+    initControls()
     setAmountOfEnemies();
     animate(0);
   }
