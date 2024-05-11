@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let lasttime = 0;
   let score = 0;
   let highScore = 0;
-  let enemyLength = 1;
 
   //UTILS
   function offsetVector(a, b) {
@@ -34,6 +33,13 @@ document.addEventListener("DOMContentLoaded", function () {
   function normaliseVector(v) {
     const length = getVectorLength(v);
     return { x: v.x / length, y: v.y / length };
+  }
+  function getMousePos(canvas, e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
   }
 
   // CLASSES
@@ -235,8 +241,12 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       if (this.health <= 0) {
-        enemies.splice(enemies.indexOf(this), 1);
-        score += 1;
+        const index = enemies.indexOf(this);
+        if (index > -1) {
+          enemies.splice(index, 1);
+          score += 1;
+          checkIfWaveComplete();
+        }
       }
     }
     attack() {
@@ -261,10 +271,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  const player = new Player({ name: "player", position: { x: 100, y: 100 } });
+  let player = null;
   const enemies = [];
 
-  // FUNCTIONS
+  // ENEMY GENERATOR FUNCTIONS
 
   function randomEnemyGenerator() {
     const randomX = Math.random() * canvas.width;
@@ -293,19 +303,84 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
-  function setAmountOfEnemies(amount = 1) {
-    enemies.length = 0;
-    for (let i = 0; i < amount; i++) {
+  function setEnemies(amount = 1, waveTime = 50000, immediateSpawn = false) {
+    if (immediateSpawn) {
       randomEnemyGenerator();
+      amount--;
+    }
+
+    for (let i = 0; i < amount; i++) {
+      let spawnTime = Math.random() * waveTime;
+      setTimeout(randomEnemyGenerator, spawnTime);
     }
   }
 
-  function getMousePos(canvas, e) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+  // LEVELS
+
+  let currentLevel = 1;
+
+  const levels = [
+    {
+      id: 1,
+      waves: [
+        { numEnemies: 10, waveTime: 10000, breakTime: 5000 },
+        { numEnemies: 20, waveTime: 20000, breakTime: 10000 },
+      ],
+      levelWidth: 1280,
+      levelHeight: 720,
+    },
+    {
+      id: 2,
+      waves: [
+        { numEnemies: 20, waveTime: 15000, breakTime: 7000 },
+        { numEnemies: 30, waveTime: 25000, breakTime: 10000 },
+      ],
+      levelWidth: 1280,
+      levelHeight: 720,
+    },
+  ];
+
+  let waveIndex = 0;
+  function startNextWave(waves) {
+    console.log("Starting wave");
+    if (waveIndex < waves.length) {
+      let wave = waves[waveIndex];
+      setEnemies(wave.numEnemies, wave.waveTime, waveIndex === 0);
+      waveIndex++;
+    } else {
+      waveIndex = 0;
+      checkIfLevelComplete();
+    }
+  }
+
+  function checkIfWaveComplete() {
+    if (enemies.length === 0) {
+      console.log("Wave complete");
+      let wave = levels[currentLevel - 1].waves[waveIndex - 1];
+      setTimeout(
+        () => startNextWave(levels[currentLevel - 1].waves),
+        wave.breakTime
+      );
+    }
+  }
+
+  function loadLevel(levelId) {
+    const level = levels.find((l) => l.id === levelId);
+    if (!level) {
+      loadLevel(1);
+      return;
+    }
+    currentLevel = levelId;
+    canvas.width = level.levelWidth;
+    canvas.height = level.levelHeight;
+    waveIndex = 0;
+    startNextWave(level.waves);
+  }
+
+  function checkIfLevelComplete() {
+    if (enemies.length === 0 && currentLevel < levels.length) {
+      loadLevel(currentLevel + 1);
+    }
   }
 
   // CONTROLS
@@ -316,7 +391,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function checkKeys() {
-    const keys = getControls()
+    const keys = getControls();
     if (keys.left) {
       player.acceleration.x = -player.speed;
     } else if (keys.right) {
@@ -370,10 +445,6 @@ document.addEventListener("DOMContentLoaded", function () {
     showHighScore();
     debug();
     checkKeys();
-    if (enemies.length < 1) {
-      enemyLength += 1;
-      setAmountOfEnemies(enemyLength);
-    }
     if (player.health <= 0) {
       alert("GAME OVER");
       resetGame();
@@ -382,17 +453,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function gameInit() {
-    initControls()
-    setAmountOfEnemies();
+    player = new Player({ name: "player", position: { x: 100, y: 100 } });
+    loadLevel(1);
+    initControls();
     animate(0);
   }
 
   function resetGame() {
-    player.health = 100;
+    player = null;
     enemies.length = 0;
     highScore = Math.max(highScore, score);
     score = 0;
-    setAmountOfEnemies();
     gameInit();
   }
 
