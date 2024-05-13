@@ -12,11 +12,14 @@ document.addEventListener("DOMContentLoaded", function () {
     canvas.classList.remove("canvas-shoot");
   });
 
-  canvas.width = 1280;
-  canvas.height = 720;
+  // GLOBAL VARIABLES
+  canvas.width = 960;
+  canvas.height = 540;
   let lasttime = 0;
   let score = 0;
   let highScore = 0;
+  let worldWidth = 1280;
+  let worldHeight = 720;
 
   //UTILS
   function offsetVector(a, b) {
@@ -37,8 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function getMousePos(canvas, e) {
     const rect = canvas.getBoundingClientRect();
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - rect.left + camera.position.x,
+      y: e.clientY - rect.top + camera.position.y,
     };
   }
 
@@ -371,8 +374,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     currentLevel = levelId;
-    canvas.width = level.levelWidth;
-    canvas.height = level.levelHeight;
+    worldWidth = level.levelWidth;
+    worldHeight = level.levelHeight;
     waveIndex = 0;
     startNextWave(level.waves);
   }
@@ -383,10 +386,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // CAMERA
+  const camera = {
+    position: { x: 0, y: 0 },
+    width: canvas.width,
+    height: canvas.height,
+  };
+
+  function updateCamera() {
+    camera.position.x = Math.max(
+      0,
+      Math.min(player.position.x - canvas.width / 2, worldWidth - canvas.width)
+    );
+    camera.position.y = Math.max(
+      0,
+      Math.min(
+        player.position.y - canvas.height / 2,
+        worldHeight - canvas.height
+      )
+    );
+  }
+
   // CONTROLS
 
   document.addEventListener("click", function (e) {
-    const mousePos = getMousePos(canvas, e);
+    const mousePos = getMousePos(canvas, e, camera);
     player.shoot(mousePos);
   });
 
@@ -434,21 +458,25 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function animate(timestamp) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     let deltatime = (timestamp - lasttime) / 1000;
     lasttime = timestamp;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(-camera.position.x, -camera.position.y);
     enemies.forEach((enemy) => {
       enemy.update(deltatime);
     });
     player.update(deltatime);
-    showScore();
-    showHighScore();
     debug();
     checkKeys();
     if (player.health <= 0) {
       alert("GAME OVER");
       resetGame();
     }
+    ctx.restore();
+    showScore();
+    showHighScore();
+    updateCamera();
     requestAnimationFrame(animate);
   }
 
