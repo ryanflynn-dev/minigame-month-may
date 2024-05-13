@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   let player = null;
-  const enemies = [];
+  let enemies = [];
 
   // ENEMY GENERATOR FUNCTIONS
 
@@ -409,10 +409,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // CONTROLS
 
-  document.addEventListener("click", function (e) {
+  function initMouseControls() {
+    document.removeEventListener("click", handleMouseInput);
+    document.addEventListener("click", handleMouseInput);
+  }
+
+  function handleMouseInput(e) {
+    if (!player) return;
     const mousePos = getMousePos(canvas, e, camera);
     player.shoot(mousePos);
-  });
+  }
 
   function checkKeys() {
     const keys = getControls();
@@ -457,8 +463,12 @@ document.addEventListener("DOMContentLoaded", function () {
     debug("player", player.health);
   }
 
+  let deltatime = 0;
+  let animationFrameId;
   function animate(timestamp) {
-    let deltatime = (timestamp - lasttime) / 1000;
+    cancelAnimationFrame(animationFrameId);
+    if (!lasttime) lasttime = timestamp;
+    deltatime = (timestamp - lasttime) / 1000;
     lasttime = timestamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -470,26 +480,27 @@ document.addEventListener("DOMContentLoaded", function () {
     debug();
     checkKeys();
     if (player.health <= 0) {
-      alert("GAME OVER");
       resetGame();
     }
     ctx.restore();
     showScore();
     showHighScore();
     updateCamera();
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
   }
 
   function gameInit() {
     player = new Player({ name: "player", position: { x: 100, y: 100 } });
     loadLevel(1);
     initControls();
+    initMouseControls();
     animate(0);
   }
 
   function resetGame() {
-    player = null;
-    enemies.length = 0;
+    cancelAnimationFrame(animationFrameId);
+    player = new Player({ name: "player", position: { x: 100, y: 100 } });
+    enemies = [];
     highScore = Math.max(highScore, score);
     score = 0;
     gameInit();

@@ -45,6 +45,12 @@ const handleControlInput = (e, toggle) => {
  * @return null
  */
 export const initControls = () => {
+  document.removeEventListener("keydown", (e) => {
+    handleControlInput(e, true);
+  });
+  document.removeEventListener("keyup", (e) => {
+    handleControlInput(e, false);
+  });
   document.addEventListener("keydown", (e) => {
     handleControlInput(e, true);
   });
