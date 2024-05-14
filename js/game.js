@@ -1,4 +1,5 @@
 import { initControls, getControls } from "./core/control.js";
+import { updateUI, resetUI } from "./core/ui.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -495,8 +496,7 @@ document.addEventListener("DOMContentLoaded", function () {
             resetGame();
         }
         ctx.restore();
-        showScore();
-        showHighScore();
+        updateUI(ctx, player.health, highScore, score)
         updateCamera();
         animationFrameId = requestAnimationFrame(animate);
     }
@@ -504,6 +504,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function gameInit() {
         player = new Player({ name: "player", position: { x: 100, y: 100 } });
         loadLevel(1);
+        resetUI(ctx);
         initControls();
         initMouseControls();
         animate(0);
