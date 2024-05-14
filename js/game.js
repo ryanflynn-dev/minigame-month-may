@@ -1,4 +1,5 @@
 import { initControls, getControls } from "./core/control.js";
+import { updateUI, resetUI } from "./core/ui.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -115,6 +116,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         takeDamage(damage) {
             this.health -= damage;
+        }
+        getHealth() {
+            return this.health;
+        }
+        getRoundedHealth() {
+            return Math.floor(this.getHealth())
         }
     }
 
@@ -452,24 +459,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // GAME LOOP
 
-    function showScore() {
-        ctx.fillStyle = "black";
-        ctx.font = "30px Impact";
-        ctx.fillText("Score: " + score, 12, 32);
-        ctx.fillStyle = "white";
-        ctx.font = "30px Impact";
-        ctx.fillText("Score: " + score, 10, 30);
-    }
-
-    function showHighScore() {
-        ctx.fillStyle = "black";
-        ctx.font = "30px Impact";
-        ctx.fillText("High Score: " + highScore, 12, 62);
-        ctx.fillStyle = "white";
-        ctx.font = "30px Impact";
-        ctx.fillText("High Score: " + highScore, 10, 60);
-    }
-
     function debug() {
         const debug = console.log;
         debug("player", player.health);
@@ -495,8 +484,7 @@ document.addEventListener("DOMContentLoaded", function () {
             resetGame();
         }
         ctx.restore();
-        showScore();
-        showHighScore();
+        updateUI(ctx, player.getRoundedHealth(), highScore, score)
         updateCamera();
         animationFrameId = requestAnimationFrame(animate);
     }
@@ -504,6 +492,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function gameInit() {
         player = new Player({ name: "player", position: { x: 100, y: 100 } });
         loadLevel(1);
+        resetUI(ctx);
         initControls();
         initMouseControls();
         animate(0);
