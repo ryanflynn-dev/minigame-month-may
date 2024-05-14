@@ -117,6 +117,12 @@ document.addEventListener("DOMContentLoaded", function () {
         takeDamage(damage) {
             this.health -= damage;
         }
+        getHealth() {
+            return this.health;
+        }
+        getRoundedHealth() {
+            return Math.floor(this.getHealth())
+        }
     }
 
     class Player extends Character {
@@ -496,7 +502,7 @@ document.addEventListener("DOMContentLoaded", function () {
             resetGame();
         }
         ctx.restore();
-        updateUI(ctx, player.health, highScore, score)
+        updateUI(ctx, player.getRoundedHealth(), highScore, score)
         updateCamera();
         animationFrameId = requestAnimationFrame(animate);
     }
