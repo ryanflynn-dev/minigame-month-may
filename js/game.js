@@ -459,24 +459,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // GAME LOOP
 
-    function showScore() {
-        ctx.fillStyle = "black";
-        ctx.font = "30px Impact";
-        ctx.fillText("Score: " + score, 12, 32);
-        ctx.fillStyle = "white";
-        ctx.font = "30px Impact";
-        ctx.fillText("Score: " + score, 10, 30);
-    }
-
-    function showHighScore() {
-        ctx.fillStyle = "black";
-        ctx.font = "30px Impact";
-        ctx.fillText("High Score: " + highScore, 12, 62);
-        ctx.fillStyle = "white";
-        ctx.font = "30px Impact";
-        ctx.fillText("High Score: " + highScore, 10, 60);
-    }
-
     function debug() {
         const debug = console.log;
         debug("player", player.health);
