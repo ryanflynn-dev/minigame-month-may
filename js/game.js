@@ -1,5 +1,10 @@
 import { initControls, getControls } from "./core/control.js";
 import { updateUI, resetUI } from "./core/ui.js";
+import {
+    startScreenShake,
+    updateScreenShake,
+    resetScreenShake,
+} from "./core/effects.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -121,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return this.health;
         }
         getRoundedHealth() {
-            return Math.floor(this.getHealth())
+            return Math.floor(this.getHealth());
         }
     }
 
@@ -250,6 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const hitDamage = Math.random() * this.damage + this.damagePlus;
                 this.attack();
                 player.takeDamage(hitDamage);
+                startScreenShake(0.5, 4);
             }
 
             if (getVectorDistance(this.position, player.position) < 300) {
@@ -337,7 +343,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // LEVELS
 
     let currentLevel = 1;
-
     const levels = [
         {
             id: 1,
@@ -358,7 +363,6 @@ document.addEventListener("DOMContentLoaded", function () {
             levelHeight: 720,
         },
     ];
-
     let waveIndex = 0;
     function startNextWave(waves) {
         console.log("Starting wave");
@@ -408,7 +412,6 @@ document.addEventListener("DOMContentLoaded", function () {
         width: canvas.width,
         height: canvas.height,
     };
-
     function updateCamera() {
         camera.position.x = Math.max(
             0,
@@ -461,7 +464,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function debug() {
         const debug = console.log;
-        debug("player", player.health);
     }
 
     let deltatime = 0;
@@ -484,8 +486,16 @@ document.addEventListener("DOMContentLoaded", function () {
             resetGame();
         }
         ctx.restore();
-        updateUI(ctx, player.getRoundedHealth(), highScore, score)
+        updateUI(ctx, player.getRoundedHealth(), highScore, score);
         updateCamera();
+        updateScreenShake(
+            camera.position,
+            player.position,
+            worldWidth,
+            worldHeight,
+            canvas,
+            deltatime
+        );
         animationFrameId = requestAnimationFrame(animate);
     }
 
@@ -504,6 +514,7 @@ document.addEventListener("DOMContentLoaded", function () {
         enemies = [];
         highScore = Math.max(highScore, score);
         score = 0;
+        resetScreenShake();
         gameInit();
     }
 
