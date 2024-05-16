@@ -296,6 +296,138 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    class Boss extends Enemy {
+        constructor({
+            name,
+            health,
+            position,
+            speed,
+            width,
+            height,
+            color,
+            specialAttack,
+            damage,
+        }) {
+            super({
+                name: name,
+                health: health,
+                position: position,
+                velocity: { x: 0, y: 0 },
+                acceleration: { x: 0, y: 0 },
+                deceleration: 0.95,
+                speed: speed,
+                width: width,
+                height: height,
+                color: color,
+                damage: damage,
+                damagePlus: damage * 2,
+            });
+            this.specialAttackType = specialAttack;
+            this.projectiles = [];
+            this.initSpecialAttack();
+        }
+
+        update(deltatime) {
+            super.update(deltatime);
+            this.projectileUpdate(deltatime);
+
+            if (this.health <= 0) {
+                const index = enemies.indexOf(this);
+                enemies.splice(index, 1);
+                score += 10;
+                checkIfLevelComplete();
+            }
+            if (getVectorDistance(this.position, player.position) < 300) {
+                this.moveToPlayer();
+            }
+        }
+
+        initSpecialAttack() {
+            switch (this.specialAttackType) {
+                case "fireball":
+                    this.specialAttackInterval(2000);
+                    break;
+            }
+        }
+
+        projectileUpdate(deltatime) {
+            for (let i = 0; i < this.projectiles.length; i++) {
+                const projectileDamage =
+                    Math.random() * this.damage + this.damagePlus;
+                const projectile = this.projectiles[i];
+                ctx.fillStyle = projectile.color;
+                ctx.beginPath();
+                ctx.arc(
+                    projectile.position.x + projectile.width / 2,
+                    projectile.position.y + projectile.height / 2,
+                    projectile.width / 2,
+                    0,
+                    2 * Math.PI
+                );
+                ctx.fill();
+                ctx.closePath();
+                projectile.position.x +=
+                    projectile.velocity.x * projectile.speed * deltatime;
+                projectile.position.y +=
+                    projectile.velocity.y * projectile.speed * deltatime;
+                projectile.lifespan -= 1 * deltatime;
+                if (projectile.lifespan < 0) {
+                    this.explode(i);
+                }
+                if (
+                    getVectorDistance(projectile.position, player.position) < 30
+                ) {
+                    player.takeDamage(projectileDamage);
+                    startScreenShake(0.5, 4);
+                }
+            }
+        }
+
+        explode(index) {
+            startScreenShake(0.5, 4);
+            this.projectiles.splice(index, 1);
+        }
+
+        specialAttackInterval(interval) {
+            const randomInterval = Math.random() * interval + 1000;
+            setTimeout(() => {
+                this.specialAttack();
+                this.specialAttackInterval(interval);
+            }, randomInterval);
+        }
+
+        specialAttack() {
+            const direction = offsetVector(
+                { x: player.position.x, y: player.position.y },
+                {
+                    x: this.position.x + this.width / 2,
+                    y: this.position.y + this.height / 2,
+                }
+            );
+            const normalisedVector = normaliseVector(direction);
+            if (this.specialAttackType === "fireball") {
+                const projectile = {
+                    name: "fireball",
+                    position: {
+                        x: this.position.x + this.width / 2,
+                        y: this.position.y + this.height / 2,
+                    },
+                    velocity: {
+                        x: normalisedVector.x * 10,
+                        y: normalisedVector.y * 10,
+                    },
+                    acceleration: { x: 0, y: 0 },
+                    color: "gold",
+                    width: 30,
+                    height: 30,
+                    lifespan: 10,
+                    speed: 5,
+                };
+                this.projectiles.push(projectile);
+            }
+        }
+    }
+
     let player = null;
     let enemies = [];
 
@@ -350,6 +482,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 { numEnemies: 10, waveTime: 10000, breakTime: 5000 },
                 { numEnemies: 20, waveTime: 20000, breakTime: 10000 },
             ],
+            boss: {
+                name: "Boss1",
+                health: 500,
+                position: { x: 640, y: 360 },
+                speed: 0.1,
+                width: 50,
+                height: 50,
+                color: "red",
+                specialAttack: "fireball",
+                damage: 1,
+            },
             levelWidth: 1280,
             levelHeight: 720,
         },
@@ -359,6 +502,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 { numEnemies: 20, waveTime: 15000, breakTime: 7000 },
                 { numEnemies: 30, waveTime: 25000, breakTime: 10000 },
             ],
+            boss: {
+                name: "Boss2",
+                health: 1000,
+                position: { x: 640, y: 360 },
+                speed: 40,
+                width: 60,
+                height: 60,
+                color: "gold",
+                specialAttack: "fireball",
+                damage: 1,
+            },
+
             levelWidth: 1280,
             levelHeight: 720,
         },
@@ -380,10 +535,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (enemies.length === 0) {
             console.log("Wave complete");
             let wave = levels[currentLevel - 1].waves[waveIndex - 1];
-            setTimeout(
-                () => startNextWave(levels[currentLevel - 1].waves),
-                wave.breakTime
-            );
+            if (waveIndex >= levels[currentLevel - 1].waves.length) {
+                spawnBoss();
+            } else {
+                setTimeout(
+                    () => startNextWave(levels[currentLevel - 1].waves),
+                    wave.breakTime
+                );
+            }
         }
     }
 
@@ -401,8 +560,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function checkIfLevelComplete() {
-        if (enemies.length === 0 && currentLevel < levels.length) {
-            loadLevel(currentLevel + 1);
+        if (enemies.length === 0) {
+            if (currentLevel < levels.length) {
+                loadLevel(currentLevel + 1);
+            } else {
+                loadLevel(1);
+            }
+        }
+    }
+
+    function spawnBoss() {
+        const level = levels[currentLevel - 1];
+        const bossConfig = level.boss;
+        if (bossConfig) {
+            const boss = new Boss(bossConfig);
+            enemies.push(boss);
         }
     }
 
