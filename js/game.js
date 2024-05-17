@@ -28,28 +28,20 @@ document.addEventListener("DOMContentLoaded", function () {
     let worldHeight = 720;
 
     //UTILS
-    function offsetVector(a, b) {
-        const offset = { x: a.x - b.x, y: a.y - b.y };
-        return offset;
-    }
-    function getVectorLength(a) {
-        const length = Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2));
-        return length;
-    }
-    function getVectorDistance(a, b) {
-        return getVectorLength(offsetVector(a, b));
-    }
-    function normaliseVector(v) {
+    const offsetVector = (a, b) => ({ x: a.x - b.x, y: a.y - b.y });
+    const getVectorLength = (a) => Math.sqrt(a.x ** 2 + a.y ** 2);
+    const getVectorDistance = (a, b) => getVectorLength(offsetVector(a, b));
+    const normaliseVector = (v) => {
         const length = getVectorLength(v);
         return { x: v.x / length, y: v.y / length };
-    }
-    function getMousePos(canvas, e) {
+    };
+    const getMousePos = (canvas, e) => {
         const rect = canvas.getBoundingClientRect();
         return {
             x: e.clientX - rect.left + camera.position.x,
             y: e.clientY - rect.top + camera.position.y,
         };
-    }
+    };
 
     // CLASSES
 
@@ -438,8 +430,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "purple",
             "orange",
             "magenta",
-            "white",
-            "black",
         ];
         enemies.push(
             new Enemy({
@@ -454,11 +444,9 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
-    function setEnemies(amount = 1, waveTime = 50000, immediateSpawn = false) {
-        if (immediateSpawn) {
-            randomEnemyGenerator();
-            amount--;
-        }
+    function setEnemies(amount = 1, waveTime = 50000) {
+        randomEnemyGenerator();
+        amount--;
 
         for (let i = 0; i < amount; i++) {
             let spawnTime = Math.random() * waveTime;
@@ -519,7 +507,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Starting wave");
         if (waveIndex < waves.length) {
             let wave = waves[waveIndex];
-            setEnemies(wave.numEnemies, wave.waveTime, waveIndex === 0);
+            setEnemies(wave.numEnemies, wave.waveTime);
             waveIndex++;
         } else {
             waveIndex = 0;
