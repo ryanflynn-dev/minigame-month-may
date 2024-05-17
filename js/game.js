@@ -307,6 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
             color,
             specialAttack,
             damage,
+            attackInterval,
         }) {
             super({
                 name: name,
@@ -322,9 +323,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 damage: damage,
                 damagePlus: damage * 2,
             });
+            this.interval = attackInterval;
             this.specialAttackType = specialAttack;
             this.projectiles = [];
-            this.initSpecialAttack();
+            this.specialAttackInterval(this.interval);
         }
 
         update(deltatime) {
@@ -339,14 +341,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (getVectorDistance(this.position, player.position) < 300) {
                 this.moveToPlayer();
-            }
-        }
-
-        initSpecialAttack() {
-            switch (this.specialAttackType) {
-                case "fireball":
-                    this.specialAttackInterval(2000);
-                    break;
             }
         }
 
@@ -492,6 +486,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: "red",
                 specialAttack: "fireball",
                 damage: 1,
+                attackInterval: 2000,
             },
             levelWidth: 1280,
             levelHeight: 720,
@@ -512,6 +507,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: "gold",
                 specialAttack: "fireball",
                 damage: 1,
+                attackInterval: 1000,
             },
 
             levelWidth: 1280,
