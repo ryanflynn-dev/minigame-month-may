@@ -5,6 +5,12 @@ import {
     updateScreenShake,
     resetScreenShake,
 } from "./core/effects.js";
+import {
+    offsetVector,
+    normaliseVector,
+    getVectorDistance,
+    getMousePos,
+} from "./core/utils.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -26,22 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let highScore = 0;
     let worldWidth = 1280;
     let worldHeight = 720;
-
-    //UTILS
-    const offsetVector = (a, b) => ({ x: a.x - b.x, y: a.y - b.y });
-    const getVectorLength = (a) => Math.sqrt(a.x ** 2 + a.y ** 2);
-    const getVectorDistance = (a, b) => getVectorLength(offsetVector(a, b));
-    const normaliseVector = (v) => {
-        const length = getVectorLength(v);
-        return { x: v.x / length, y: v.y / length };
-    };
-    const getMousePos = (canvas, e) => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: e.clientX - rect.left + camera.position.x,
-            y: e.clientY - rect.top + camera.position.y,
-        };
-    };
 
     // CLASSES
 
