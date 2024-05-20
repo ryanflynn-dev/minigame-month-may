@@ -5,6 +5,13 @@ import {
     updateScreenShake,
     resetScreenShake,
 } from "./core/effects.js";
+import {
+    offsetVector,
+    normaliseVector,
+    getVectorDistance,
+    getMousePos,
+} from "./core/utils.js";
+import { items, dropRandomItem, updateItems, drawItems } from "./core/items.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -26,22 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let highScore = 0;
     let worldWidth = 1280;
     let worldHeight = 720;
-
-    //UTILS
-    const offsetVector = (a, b) => ({ x: a.x - b.x, y: a.y - b.y });
-    const getVectorLength = (a) => Math.sqrt(a.x ** 2 + a.y ** 2);
-    const getVectorDistance = (a, b) => getVectorLength(offsetVector(a, b));
-    const normaliseVector = (v) => {
-        const length = getVectorLength(v);
-        return { x: v.x / length, y: v.y / length };
-    };
-    const getMousePos = (canvas, e) => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: e.clientX - rect.left + camera.position.x,
-            y: e.clientY - rect.top + camera.position.y,
-        };
-    };
 
     // CLASSES
 
@@ -240,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 damage: 0.1,
                 damagePlus: 0.4,
             });
+            this.dropChance = 0.5;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -255,12 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (this.health <= 0) {
-                const index = enemies.indexOf(this);
-                if (index > -1) {
-                    enemies.splice(index, 1);
-                    score += 1;
-                    checkIfWaveComplete();
-                }
+                this.handleDeath();
             }
         }
         attack() {
@@ -285,6 +272,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
             this.velocity.x = normalisedVector.x * this.speed;
             this.velocity.y = normalisedVector.y * this.speed;
+        }
+        handleDeath() {
+            const index = enemies.indexOf(this);
+            if (index > -1) {
+                enemies.splice(index, 1);
+                score += 1;
+                checkIfWaveComplete();
+
+                if (Math.random() < this.dropChance) {
+                    dropRandomItem(this.position);
+                }
+            }
         }
     }
 
@@ -636,6 +635,8 @@ document.addEventListener("DOMContentLoaded", function () {
             enemy.update(deltatime);
         });
         player.update(deltatime);
+        updateItems(player);
+        drawItems(ctx);
         debug();
         checkKeys();
         if (player.health <= 0) {
