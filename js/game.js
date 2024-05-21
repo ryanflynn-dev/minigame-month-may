@@ -11,7 +11,8 @@ import {
     getVectorDistance,
     getMousePos,
 } from "./core/utils.js";
-import { items, dropRandomItem, updateItems, drawItems } from "./core/items.js";
+import { dropRandomItem, updateItems, drawItems } from "./core/items.js";
+import { generateLevels } from "./core/levels.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -524,51 +525,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // LEVELS
 
     let currentLevel = 1;
-    const levels = [
-        {
-            id: 1,
-            waves: [
-                { numEnemies: 10, waveTime: 10000, breakTime: 5000 },
-                { numEnemies: 20, waveTime: 20000, breakTime: 10000 },
-            ],
-            boss: {
-                name: "Boss1",
-                health: 500,
-                position: { x: 640, y: 360 },
-                speed: 0.1,
-                width: 50,
-                height: 50,
-                color: "red",
-                specialAttack: "fireball",
-                damage: 1,
-                attackInterval: 2000,
-            },
-            levelWidth: 1280,
-            levelHeight: 720,
-        },
-        {
-            id: 2,
-            waves: [
-                { numEnemies: 20, waveTime: 15000, breakTime: 7000 },
-                { numEnemies: 30, waveTime: 25000, breakTime: 10000 },
-            ],
-            boss: {
-                name: "Boss2",
-                health: 1000,
-                position: { x: 640, y: 360 },
-                speed: 40,
-                width: 60,
-                height: 60,
-                color: "gold",
-                specialAttack: "fireball",
-                damage: 1,
-                attackInterval: 1000,
-            },
+    const levels = generateLevels(10);
 
-            levelWidth: 1280,
-            levelHeight: 720,
-        },
-    ];
     let waveIndex = 0;
     function startNextWave(waves) {
         console.log("Starting wave");
@@ -682,7 +640,6 @@ document.addEventListener("DOMContentLoaded", function () {
             player.acceleration.y = 0;
         }
         if (keys.shift) {
-            console.log("shift");
             const nextPhaseIndex =
                 (phases.indexOf(player.phase) + 1) % phases.length;
             player.phaseShift(phases[nextPhaseIndex]);
