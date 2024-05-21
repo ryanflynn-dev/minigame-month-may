@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.color = color;
             this.damage = damage;
             this.damagePlus = damagePlus;
+            this.phase = "normal";
         }
         update(deltatime) {
             this.draw();
@@ -76,6 +77,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
             this.position.x += this.velocity.x * deltatime;
             this.position.y += this.velocity.y * deltatime;
+
+            switch (this.phase) {
+                case "normal":
+                    this.color = "white";
+                    break;
+                case "water":
+                    this.color = "blue";
+                    break;
+                case "earth":
+                    this.color = "green";
+                    break;
+                case "fire":
+                    this.color = "red";
+                    break;
+                case "air":
+                    this.color = "yellow";
+                    break;
+            }
         }
 
         draw() {
@@ -102,8 +121,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 this.position.y = canvas.height - this.height;
             }
         }
-        takeDamage(damage) {
-            this.health -= damage;
+        takeDamage(damage, phase) {
+            if (this.isImmuneTo(phase)) {
+                return;
+            } else {
+                this.health -= damage;
+            }
         }
         getHealth() {
             return this.health;
@@ -111,10 +134,18 @@ document.addEventListener("DOMContentLoaded", function () {
         getRoundedHealth() {
             return Math.floor(this.getHealth());
         }
+        phaseShift(phase) {
+            if (this.phase !== phase) {
+                this.phase = phase;
+            }
+        }
+        isImmuneTo(phase) {
+            return this.phase === phase;
+        }
     }
 
     class Player extends Character {
-        constructor({ name, position }) {
+        constructor({ name, position, phase }) {
             super({
                 name: name,
                 health: 100,
@@ -125,10 +156,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 speed: 5,
                 width: 20,
                 height: 20,
-                color: "cyan",
+                color: "white",
                 damage: 10,
                 damagePlus: 10,
             });
+            this.phase = phase;
+            this.phaseCooldown = 1;
+            this.lastPhaseShift = 0;
             this.bullets = [];
         }
 
@@ -159,6 +193,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 bullet.position.y +=
                     bullet.velocity.y * bullet.speed * deltatime;
                 bullet.lifespan -= 1 * deltatime;
+                switch (bullet.phase) {
+                    case "normal":
+                        bullet.color = "white";
+                        break;
+                    case "water":
+                        bullet.color = "blue";
+                        break;
+                    case "earth":
+                        bullet.color = "green";
+                        break;
+                    case "fire":
+                        bullet.color = "red";
+                        break;
+                    case "air":
+                        bullet.color = "yellow";
+                        break;
+                }
                 if (bullet.lifespan < 0) {
                     this.removeBullet(i);
                 }
@@ -176,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         );
                         if (distance <= bullet.width / 2 + enemy.width / 2) {
-                            enemy.takeDamage(bulletDamage);
+                            enemy.takeDamage(bulletDamage, bullet.phase);
                             this.removeBullet(i);
                         }
                     }
@@ -201,11 +252,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     y: normalisedVector.y * 10,
                 },
                 acceleration: { x: 0, y: 0 },
-                color: "red",
+                color: "white",
                 width: 5,
                 height: 5,
                 lifespan: 1,
                 speed: 50,
+                phase: this.phase,
             };
             this.bullets.push(bullet);
         }
@@ -213,10 +265,29 @@ document.addEventListener("DOMContentLoaded", function () {
         removeBullet(index) {
             this.bullets.splice(index, 1);
         }
+
+        phaseShift(phase) {
+            const currentTime = Date.now() / 1000;
+            if (currentTime - this.lastPhaseShift >= this.phaseCooldown) {
+                if (this.phase !== phase) {
+                    this.phase = phase;
+                    this.lastPhaseShift = currentTime;
+                }
+            }
+        }
     }
 
     class Enemy extends Character {
-        constructor({ name, health, position, speed, width, height, color }) {
+        constructor({
+            name,
+            health,
+            position,
+            speed,
+            width,
+            height,
+            color,
+            phase,
+        }) {
             super({
                 name: name,
                 health: health,
@@ -231,6 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 damage: 0.1,
                 damagePlus: 0.4,
             });
+            this.phase = phase;
             this.dropChance = 0.5;
         }
         update(deltatime) {
@@ -238,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (getVectorDistance(this.position, player.position) < 50) {
                 const hitDamage = Math.random() * this.damage + this.damagePlus;
                 this.attack();
-                player.takeDamage(hitDamage);
+                player.takeDamage(hitDamage, this.phase);
                 startScreenShake(0.5, 4);
             }
 
@@ -299,6 +371,7 @@ document.addEventListener("DOMContentLoaded", function () {
             specialAttack,
             damage,
             attackInterval,
+            phase,
         }) {
             super({
                 name: name,
@@ -314,6 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 damage: damage,
                 damagePlus: damage * 2,
             });
+            this.phase = phase;
             this.interval = attackInterval;
             this.specialAttackType = specialAttack;
             this.projectiles = [];
@@ -362,7 +436,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (
                     getVectorDistance(projectile.position, player.position) < 30
                 ) {
-                    player.takeDamage(projectileDamage);
+                    player.takeDamage(projectileDamage, projectile.phase);
                     startScreenShake(0.5, 4);
                 }
             }
@@ -402,11 +476,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         y: normalisedVector.y * 10,
                     },
                     acceleration: { x: 0, y: 0 },
-                    color: "gold",
+                    color: "red",
                     width: 30,
                     height: 30,
                     lifespan: 10,
                     speed: 5,
+                    phase: "fire",
                 };
                 this.projectiles.push(projectile);
             }
@@ -415,21 +490,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let player = null;
     let enemies = [];
+    let phases = ["normal", "fire", "water", "earth", "air"];
 
     // ENEMY GENERATOR FUNCTIONS
 
     function randomEnemyGenerator() {
         const randomX = Math.random() * canvas.width;
         const randomY = Math.random() * canvas.height;
-        const colors = [
-            "red",
-            "green",
-            "blue",
-            "yellow",
-            "purple",
-            "orange",
-            "magenta",
-        ];
         enemies.push(
             new Enemy({
                 name: "enemy",
@@ -438,7 +505,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 speed: Math.random() * 30 + 20,
                 width: 20,
                 height: 20,
-                color: colors[Math.floor(Math.random() * colors.length)],
+                color: "white",
+                phase: phases[Math.floor(Math.random() * phases.length)],
             })
         );
     }
@@ -612,6 +680,12 @@ document.addEventListener("DOMContentLoaded", function () {
             player.acceleration.y = player.speed;
         } else {
             player.acceleration.y = 0;
+        }
+        if (keys.shift) {
+            console.log("shift");
+            const nextPhaseIndex =
+                (phases.indexOf(player.phase) + 1) % phases.length;
+            player.phaseShift(phases[nextPhaseIndex]);
         }
     }
 
