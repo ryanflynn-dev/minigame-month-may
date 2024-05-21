@@ -1,12 +1,13 @@
 /**
  * A mapping of keys current pressed
- * @typedef {{left: boolean, up: boolean, right: boolean, down: boolean}} keyCodes
+ * @typedef {{left: boolean, up: boolean, right: boolean, down: boolean, shift: boolean}} keyCodes
  */
 const controls = {
     left: false,
     up: false,
     right: false,
     down: false,
+    shift: false,
 };
 
 /**
@@ -35,6 +36,9 @@ const handleControlInput = (e, toggle) => {
         case "ArrowDown":
         case "KeyS":
             controls.down = toggle;
+            break;
+        case "KeyE":
+            controls.shift = toggle;
             break;
     }
 };
