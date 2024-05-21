@@ -45,3 +45,15 @@ export const getMousePos = (canvas, e, camera) => {
         y: e.clientY - rect.top + camera.position.y,
     };
 };
+
+/**
+ * Returns a random integer between min (inclusive) and max (exclusive).
+ * @param {number} - min
+ * @param {number} - max
+ * @returns {number}
+ */
+export const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+};
