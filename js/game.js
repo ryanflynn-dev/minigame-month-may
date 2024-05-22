@@ -13,6 +13,7 @@ import {
 } from "./core/utils.js";
 import { dropRandomItem, updateItems, drawItems } from "./core/items.js";
 import { generateLevels } from "./core/levels.js";
+import { loopingSound, playSound, stopSound } from "./core/sound.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -236,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         shoot(mousePosition) {
+            playSound("shoot");
             const direction = offsetVector(mousePosition, {
                 x: this.position.x + this.width / 2,
                 y: this.position.y + this.height / 2,
@@ -347,6 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.velocity.y = normalisedVector.y * this.speed;
         }
         handleDeath() {
+            playSound("death");
             const index = enemies.indexOf(this);
             if (index > -1) {
                 enemies.splice(index, 1);
@@ -444,6 +447,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         explode(index) {
+            playSound("explosion");
             startScreenShake(0.5, 4);
             this.projectiles.splice(index, 1);
         }
@@ -507,7 +511,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 width: 20,
                 height: 20,
                 color: "white",
-                phase: phases[Math.floor(Math.random() * phases.length)],
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
             })
         );
     }
@@ -525,9 +531,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // LEVELS
 
     let currentLevel = 1;
+    let waveIndex = 0;
     const levels = generateLevels(10);
 
-    let waveIndex = 0;
     function startNextWave(waves) {
         console.log("Starting wave");
         if (waveIndex < waves.length) {
@@ -671,6 +677,7 @@ document.addEventListener("DOMContentLoaded", function () {
         debug();
         checkKeys();
         if (player.health <= 0) {
+            playSound("playerDeath");
             resetGame();
         }
         ctx.restore();
@@ -694,9 +701,11 @@ document.addEventListener("DOMContentLoaded", function () {
         initControls();
         initMouseControls();
         animate(0);
+        loopingSound("backgroundSong");
     }
 
     function resetGame() {
+        stopSound("backgroundSong");
         cancelAnimationFrame(animationFrameId);
         player = new Player({ name: "player", position: { x: 100, y: 100 } });
         enemies = [];
