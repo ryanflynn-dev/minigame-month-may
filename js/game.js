@@ -4,7 +4,7 @@ import {
     startScreenShake,
     updateScreenShake,
     resetScreenShake,
-} from "./core/effects.js";
+} from "./core/effects/screenshake.js";
 import {
     offsetVector,
     normaliseVector,
@@ -14,6 +14,11 @@ import {
 import { dropRandomItem, updateItems, drawItems } from "./core/items.js";
 import { generateLevels } from "./core/levels.js";
 import { loopingSound, playSound, stopSound } from "./core/sound.js";
+import {
+    createExplosion,
+    updateParticles,
+    drawParticles,
+} from "./core/effects/particles.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
@@ -238,6 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         shoot(mousePosition) {
             playSound("shoot");
+            createExplosion(this.position, 1, this.color);
             const direction = offsetVector(mousePosition, {
                 x: this.position.x + this.width / 2,
                 y: this.position.y + this.height / 2,
@@ -350,6 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         handleDeath() {
             playSound("death");
+            createExplosion(this.position);
             const index = enemies.indexOf(this);
             if (index > -1) {
                 enemies.splice(index, 1);
@@ -672,6 +679,8 @@ document.addEventListener("DOMContentLoaded", function () {
             enemy.update(deltatime);
         });
         player.update(deltatime);
+        updateParticles(deltatime);
+        drawParticles(ctx);
         updateItems(player);
         drawItems(ctx);
         debug();
