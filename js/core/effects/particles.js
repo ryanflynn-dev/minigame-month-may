@@ -1,3 +1,13 @@
+/**
+ * Creates a particle object.
+ *
+ * @param {Object} - position
+ * @param {Object} - velocity
+ * @param {Object} - acceleration
+ * @param {number} - lifespan
+ * @param {string} - color
+ * @returns {Object} - particle
+ */
 class Particle {
     constructor({ position, velocity, acceleration, lifespan, color }) {
         this.position = position;
@@ -39,6 +49,13 @@ class Particle {
 
 const particles = [];
 
+/**
+ * Creates particles at a given position.
+ *
+ * @param {object} - position x,y
+ * @param {number} - amount of particles
+ * @param {string} - color
+ */
 export const createExplosion = (position, amount = 50, color = "white") => {
     for (let i = 0; i < amount; i++) {
         const particle = new Particle({
@@ -61,6 +78,11 @@ export const createExplosion = (position, amount = 50, color = "white") => {
     }
 };
 
+/**
+ * Updates all particles.
+ *
+ * @param {number} - deltatime
+ */
 export const updateParticles = (deltatime) => {
     for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].update(deltatime);
@@ -70,6 +92,11 @@ export const updateParticles = (deltatime) => {
     }
 };
 
+/**
+ * Draws all particles.
+ *
+ * @param {CanvasRenderingContext2D} - 2D Canvas
+ */
 export const drawParticles = (ctx) => {
     for (let i = 0; i < particles.length; i++) {
         particles[i].draw(ctx);
