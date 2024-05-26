@@ -21,8 +21,23 @@ import {
 } from "./core/effects/particles.js";
 
 document.addEventListener("DOMContentLoaded", function () {
+    const loader = document.getElementById("loader");
+    const titleScreen = document.getElementById("title-screen");
+    const startButton = document.getElementById("start-game");
+    const app = document.getElementById("app");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+
+    setTimeout(() => {
+        loader.style.display = "none";
+        titleScreen.style.display = "flex";
+    }, 3000);
+
+    startButton.addEventListener("click", () => {
+        titleScreen.style.display = "none";
+        app.style.display = "flex";
+        gameInit();
+    });
 
     canvas.addEventListener("mouseenter", () => {
         canvas.classList.add("canvas-shoot");
@@ -723,6 +738,4 @@ document.addEventListener("DOMContentLoaded", function () {
         resetScreenShake();
         gameInit();
     }
-
-    gameInit();
 });

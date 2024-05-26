@@ -1,21 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>game</title>
-  </head>
-  <body style="background: #000000; overflow: hidden; cursor: crosshair">
-    <div
-      id="app"
-      style="align-items: center; display: flex; justify-content: center">
-      <canvas
-        id="canvas"
-        width="600"
-        height="400"
-        style="border: 1px solid #000; background: #464646">
-        Your browser does not support the HTML5 canvas tag.
-      </canvas>
-    </div>
+    <head>
+        <title>game</title>
+        <link rel="stylesheet" href="./css/style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div id="loader" class="loader">
+                <h1>Loading...</h1>
+            </div>
+            <div id="title-screen" class="title-screen">
+                <h1>(!game)</h1>
+                <button id="start-game">Start</button>
+            </div>
+            <div id="app" class="app">
+                <canvas
+                    id="canvas"
+                    class="canvas"
+                    width="600"
+                    height="400"
+                    style="border: 1px solid #000; background: #464646">
+                    Your browser does not support the HTML5 canvas tag.
+                </canvas>
+            </div>
+        </div>
 
-    <script type="module" src="./js/game.js"></script>
-  </body>
+        <script type="module" src="./js/game.js"></script>
+    </body>
 </html>
