@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         attack() {
-            ctx.strokeStyle = "red";
+            ctx.strokeStyle = this.color;
             ctx.beginPath();
             ctx.moveTo(
                 this.position.x + this.width / 2,
@@ -458,6 +458,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ) {
                     player.takeDamage(projectileDamage, projectile.phase);
                     startScreenShake(0.5, 4);
+                    projectile.lifespan = 0;
                 }
             }
         }
@@ -484,8 +485,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     color: this.color,
                     width: 5,
                     height: 5,
-                    lifespan: 1,
-                    speed: 50,
+                    lifespan: 2,
+                    speed: 20,
                     phase: this.phase,
                 };
                 this.projectiles.push(projectile);
@@ -520,6 +521,106 @@ document.addEventListener("DOMContentLoaded", function () {
                     dropRandomItem(this.position);
                 }
             }
+        }
+    }
+
+    class HealerEnemy extends Character {
+        constructor({
+            name,
+            health,
+            position,
+            speed,
+            width,
+            height,
+            color,
+            phase,
+        }) {
+            super({
+                name: name,
+                health: health,
+                position: position,
+                velocity: { x: 0, y: 0 },
+                acceleration: { x: 0, y: 0 },
+                deceleration: 0.95,
+                speed: speed,
+                width: width,
+                height: height,
+                color: color,
+            });
+            this.phase = phase;
+            this.dropChance = 0.5;
+            this.healAmount = 5;
+            this.healingCooldown = 1000;
+            this.lastHealTime = Date.now();
+            this.healRange = 200;
+        }
+        update(deltatime) {
+            super.update(deltatime);
+            const currentTime = Date.now();
+
+            if (currentTime - this.lastHealTime > this.healingCooldown) {
+                enemies.forEach((enemy) => {
+                    if (
+                        enemy !== this &&
+                        getVectorDistance(enemy.position, this.position) <
+                            this.healRange &&
+                        enemy.phase === this.phase &&
+                        enemy.health < 100
+                    ) {
+                        console.log("healing" + enemy.health);
+                        this.healEnemy(enemy);
+                        console.log("healing" + enemy.health);
+
+                        this.lastHealTime = currentTime;
+                    }
+                });
+            }
+
+            if (this.health <= 0) {
+                this.handleDeath();
+            }
+        }
+
+        healEnemy(enemy) {
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.moveTo(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2
+            );
+            ctx.lineTo(
+                enemy.position.x + enemy.width / 2,
+                enemy.position.y + enemy.height / 2
+            );
+            ctx.stroke();
+
+            enemy.health += this.healAmount;
+            enemy.health = Math.min(enemy.health, 100);
+        }
+
+        handleDeath() {
+            playSound("healerDeath");
+            createExplosion(this.position);
+            const index = enemies.indexOf(this);
+            if (index > -1) {
+                enemies.splice(index, 1);
+                score += 1;
+                checkIfWaveComplete();
+            }
+        }
+
+        draw() {
+            super.draw();
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2,
+                this.healRange,
+                0,
+                2 * Math.PI
+            );
+            ctx.stroke();
         }
     }
 
@@ -677,6 +778,42 @@ document.addEventListener("DOMContentLoaded", function () {
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+            new Enemy({
+                name: "enemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+            new RangedEnemy({
+                name: "rangedEnemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+            new HealerEnemy({
+                name: "healerEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
