@@ -24,10 +24,12 @@ const generateRandomLevel = (id) => {
         const breakTime = getRandomInt(5000, 10000);
         waves.push({ numEnemies, waveTime, breakTime });
     }
+    const levelWidth = getRandomInt(1280, 2560);
+    const levelHeight = getRandomInt(720, 1080);
     const boss = {
         name: `Boss${id}`,
-        health: getRandomInt(500, 10000),
-        position: { x: 640, y: 360 },
+        health: getRandomInt(500, 1000),
+        position: { x: levelWidth / 2, y: levelHeight / 2 },
         speed: getRandomInt(0.5, 40),
         width: getRandomInt(30, 100),
         height: getRandomInt(30, 100),
@@ -44,8 +46,8 @@ const generateRandomLevel = (id) => {
         id,
         waves,
         boss,
-        levelWidth: getRandomInt(1280, 2560),
-        levelHeight: getRandomInt(720, 1080),
+        levelWidth,
+        levelHeight,
     };
 };
 
