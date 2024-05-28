@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         attack() {
-            ctx.strokeStyle = "red";
+            ctx.strokeStyle = this.color;
             ctx.beginPath();
             ctx.moveTo(
                 this.position.x + this.width / 2,
@@ -382,6 +382,245 @@ document.addEventListener("DOMContentLoaded", function () {
                     dropRandomItem(this.position);
                 }
             }
+        }
+    }
+
+    class RangedEnemy extends Character {
+        constructor({
+            name,
+            health,
+            position,
+            speed,
+            width,
+            height,
+            color,
+            phase,
+        }) {
+            super({
+                name: name,
+                health: health,
+                position: position,
+                velocity: { x: 0, y: 0 },
+                acceleration: { x: 0, y: 0 },
+                deceleration: 0.95,
+                speed: speed,
+                width: width,
+                height: height,
+                color: color,
+                damage: 0.1,
+                damagePlus: 0.4,
+            });
+            this.phase = phase;
+            this.dropChance = 0.5;
+            this.projectiles = [];
+            this.interval = 3;
+            this.shootTimer = 0;
+        }
+        update(deltatime) {
+            super.update(deltatime);
+            this.projectileUpdate(deltatime);
+            this.shootTimer += deltatime;
+
+            if (getVectorDistance(this.position, player.position) < 300) {
+                this.shoot();
+            }
+
+            if (this.health <= 0) {
+                this.handleDeath();
+            }
+        }
+        projectileUpdate(deltatime) {
+            for (let i = 0; i < this.projectiles.length; i++) {
+                const projectileDamage =
+                    Math.random() * this.damage + this.damagePlus;
+                const projectile = this.projectiles[i];
+                ctx.fillStyle = projectile.color;
+                ctx.beginPath();
+                ctx.arc(
+                    projectile.position.x + projectile.width / 2,
+                    projectile.position.y + projectile.height / 2,
+                    projectile.width / 2,
+                    0,
+                    2 * Math.PI
+                );
+                ctx.fill();
+                ctx.closePath();
+                projectile.position.x +=
+                    projectile.velocity.x * projectile.speed * deltatime;
+                projectile.position.y +=
+                    projectile.velocity.y * projectile.speed * deltatime;
+                projectile.lifespan -= 1 * deltatime;
+                if (projectile.lifespan < 0) {
+                    this.explode(i);
+                }
+                if (
+                    getVectorDistance(projectile.position, player.position) < 30
+                ) {
+                    player.takeDamage(projectileDamage, projectile.phase);
+                    startScreenShake(0.5, 4);
+                    projectile.lifespan = 0;
+                }
+            }
+        }
+        shoot() {
+            const direction = offsetVector(
+                { x: player.position.x, y: player.position.y },
+                {
+                    x: this.position.x + this.width / 2,
+                    y: this.position.y + this.height / 2,
+                }
+            );
+            const normalisedVector = normaliseVector(direction);
+            if (this.shootTimer >= this.interval) {
+                const projectile = {
+                    position: {
+                        x: this.position.x + this.width / 2,
+                        y: this.position.y + this.height / 2,
+                    },
+                    velocity: {
+                        x: normalisedVector.x * 10,
+                        y: normalisedVector.y * 10,
+                    },
+                    acceleration: { x: 0, y: 0 },
+                    color: this.color,
+                    width: 5,
+                    height: 5,
+                    lifespan: 2,
+                    speed: 20,
+                    phase: this.phase,
+                };
+                this.projectiles.push(projectile);
+                this.shootTimer = 0;
+            }
+        }
+        explode(index) {
+            playSound("explosion");
+            startScreenShake(0.5, 1);
+            this.projectiles.splice(index, 1);
+        }
+        moveToPlayer() {
+            const directionVector = offsetVector(
+                player.position,
+                this.position
+            );
+            const normalisedVector = normaliseVector(directionVector);
+
+            this.velocity.x = normalisedVector.x * this.speed;
+            this.velocity.y = normalisedVector.y * this.speed;
+        }
+        handleDeath() {
+            playSound("death");
+            createExplosion(this.position);
+            const index = enemies.indexOf(this);
+            if (index > -1) {
+                enemies.splice(index, 1);
+                score += 1;
+                checkIfWaveComplete();
+
+                if (Math.random() < this.dropChance) {
+                    dropRandomItem(this.position);
+                }
+            }
+        }
+    }
+
+    class HealerEnemy extends Character {
+        constructor({
+            name,
+            health,
+            position,
+            speed,
+            width,
+            height,
+            color,
+            phase,
+        }) {
+            super({
+                name: name,
+                health: health,
+                position: position,
+                velocity: { x: 0, y: 0 },
+                acceleration: { x: 0, y: 0 },
+                deceleration: 0.95,
+                speed: speed,
+                width: width,
+                height: height,
+                color: color,
+            });
+            this.phase = phase;
+            this.dropChance = 0.5;
+            this.healAmount = 5;
+            this.healingCooldown = 1000;
+            this.lastHealTime = Date.now();
+            this.healRange = 200;
+        }
+        update(deltatime) {
+            super.update(deltatime);
+            const currentTime = Date.now();
+
+            if (currentTime - this.lastHealTime > this.healingCooldown) {
+                enemies.forEach((enemy) => {
+                    if (
+                        enemy !== this &&
+                        getVectorDistance(enemy.position, this.position) <
+                            this.healRange &&
+                        enemy.phase === this.phase &&
+                        enemy.health < 100
+                    ) {
+                        console.log("healing" + enemy.health);
+                        this.healEnemy(enemy);
+                        console.log("healing" + enemy.health);
+
+                        this.lastHealTime = currentTime;
+                    }
+                });
+            }
+
+            if (this.health <= 0) {
+                this.handleDeath();
+            }
+        }
+
+        healEnemy(enemy) {
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.moveTo(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2
+            );
+            ctx.lineTo(
+                enemy.position.x + enemy.width / 2,
+                enemy.position.y + enemy.height / 2
+            );
+            ctx.stroke();
+
+            enemy.health += this.healAmount;
+            enemy.health = Math.min(enemy.health, 100);
+        }
+
+        handleDeath() {
+            playSound("healerDeath");
+            createExplosion(this.position);
+            const index = enemies.indexOf(this);
+            if (index > -1) {
+                enemies.splice(index, 1);
+                score += 1;
+                checkIfWaveComplete();
+            }
+        }
+
+        draw() {
+            super.draw();
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2,
+                this.healRange,
+                0,
+                2 * Math.PI
+            );
+            ctx.stroke();
         }
     }
 
@@ -524,7 +763,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function randomEnemyGenerator() {
         const randomX = Math.random() * canvas.width;
         const randomY = Math.random() * canvas.height;
-        enemies.push(
+        const enemiesVariations = [
             new Enemy({
                 name: "enemy",
                 health: 100,
@@ -536,8 +775,61 @@ document.addEventListener("DOMContentLoaded", function () {
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
-            })
-        );
+            }),
+            new RangedEnemy({
+                name: "rangedEnemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+            new Enemy({
+                name: "enemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+            new RangedEnemy({
+                name: "rangedEnemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+            new HealerEnemy({
+                name: "healerEnemy",
+                health: 100,
+                position: { x: randomX, y: randomY },
+                speed: Math.random() * 30 + 20,
+                width: 20,
+                height: 20,
+                color: "white",
+                phase: phases[
+                    Math.floor(Math.random() * (phases.length - 1)) + 1
+                ],
+            }),
+        ];
+        const randomEnemy =
+            enemiesVariations[
+                Math.floor(Math.random() * enemiesVariations.length)
+            ];
+        enemies.push(randomEnemy);
     }
 
     function setEnemies(amount = 1, waveTime = 50000) {
