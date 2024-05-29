@@ -28,7 +28,9 @@
 1. Navigate to game in browser e.g. http://127.0.0.1:8083
 
 
-Music:
+## Music:
+```
 Digital Mk2 by Tri-Tachyon
 https://creativecommons.org/licenses/by-nc/4.0/
 https://soundcloud.com/tri-tachyon/albums
+```
