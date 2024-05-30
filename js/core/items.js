@@ -70,7 +70,7 @@ class Item {
     }
 }
 
-export const items = [];
+export let items = [];
 
 /**
  * Drop a random item at the position.
@@ -104,4 +104,8 @@ export const drawItems = (ctx) => {
     items.forEach((item) => {
         item.draw(ctx);
     });
+};
+
+export const resetItems = () => {
+    items = [];
 };
