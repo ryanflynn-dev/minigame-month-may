@@ -5,6 +5,7 @@
  * @returns {Audio}
  */
 const loadSound = (src) => {
+    const path = "../sound/" + src;
     const sound = new Audio();
     sound.src = src;
     return sound;
@@ -51,9 +52,9 @@ export const stopSound = (name) => {
  * @returns {Object} - sounds object.
  */
 const sounds = {
-    shoot: loadSound("../sound/fx/shoot.wav"),
-    death: loadSound("../sound/fx/death.wav"),
-    explosion: loadSound("../sound/fx/explosion.wav"),
-    playerDeath: loadSound("../sound/fx/playerDeath.wav"),
-    backgroundSong: loadSound("../sound/music/backgroundSong.wav"),
+    shoot: loadSound("../../sound/fx/shoot.wav"),
+    death: loadSound("../../sound/fx/death.wav"),
+    explosion: loadSound("../../sound/fx/explosion.wav"),
+    playerDeath: loadSound("../../sound/fx/playerDeath.wav"),
+    backgroundSong: loadSound("../../sound/music/backgroundSong.wav"),
 };
