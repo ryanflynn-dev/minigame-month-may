@@ -11,7 +11,12 @@ import {
     getVectorDistance,
     getMousePos,
 } from "./core/utils.js";
-import { dropRandomItem, updateItems, drawItems } from "./core/items.js";
+import {
+    dropRandomItem,
+    updateItems,
+    drawItems,
+    resetItems,
+} from "./core/items.js";
 import { generateLevels } from "./core/levels.js";
 import { loopingSound, playSound, stopSound } from "./core/sound.js";
 import {
@@ -790,6 +795,7 @@ document.addEventListener("DOMContentLoaded", function () {
         highScore = Math.max(highScore, score);
         score = 0;
         resetScreenShake();
+        resetItems();
         gameInit();
     }
 });
