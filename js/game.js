@@ -66,11 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let player = null;
     let enemies = [];
     let phases = ["normal", "fire", "water", "earth", "air"];
-
-    let playerImg = new Image();
-    playerImg.src = "js/assets/art/player-normal.png";
-    let enemyImg = new Image();
-    enemyImg.src = "js/assets/art/enemy-fire.png";
     let bossImg = new Image();
     bossImg.src = "js/assets/art/boss.png";
 
@@ -84,7 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
-            img,
         }) {
             super({
                 name: name,
@@ -99,10 +93,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: 0.1,
                 damagePlus: 0.4,
-                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
+            this.img = new Image();
+            this.img.src = `js/assets/art/enemy-${this.phase}.png`;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -173,7 +168,6 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
-            img,
         }) {
             super({
                 name: name,
@@ -188,13 +182,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: 0.1,
                 damagePlus: 0.4,
-                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
             this.projectiles = [];
             this.interval = 3;
             this.shootTimer = 0;
+            this.img = new Image();
+            this.img.src = `js/assets/art/Renemy-${this.phase}.png`;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -317,7 +312,6 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
-            img,
         }) {
             super({
                 name: name,
@@ -330,7 +324,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 width: width,
                 height: height,
                 color: color,
-                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
@@ -338,6 +331,8 @@ document.addEventListener("DOMContentLoaded", function () {
             this.healingCooldown = 1000;
             this.lastHealTime = Date.now();
             this.healRange = 200;
+            this.img = new Image();
+            this.img.src = `js/assets/art/Henemy1.png`;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -548,7 +543,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
-                img: enemyImg,
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
@@ -561,7 +555,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
-                img: enemyImg,
             }),
             new Enemy({
                 name: "enemy",
@@ -574,7 +567,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
-                img: enemyImg,
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
@@ -587,7 +579,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
-                img: enemyImg,
             }),
             new HealerEnemy({
                 name: "healerEnemy",
@@ -600,7 +591,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
-                img: enemyImg,
             }),
         ];
         const randomEnemy =
@@ -821,7 +811,6 @@ document.addEventListener("DOMContentLoaded", function () {
             position: { x: 100, y: 100 },
             phase: phases[0],
             enemies: enemies,
-            img: playerImg,
         });
         loadLevel(1);
         resetUI(ctx);
@@ -839,7 +828,6 @@ document.addEventListener("DOMContentLoaded", function () {
             position: { x: 100, y: 100 },
             phase: phases[0],
             enemies: enemies,
-            img: playerImg,
         });
         enemies = [];
         highScore = Math.max(highScore, score);
