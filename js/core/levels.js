@@ -26,13 +26,14 @@ const generateRandomLevel = (id) => {
     }
     const levelWidth = getRandomInt(1280, 2560);
     const levelHeight = getRandomInt(720, 1080);
+    const bossSize = getRandomInt(60, 200);
     const boss = {
         name: `Boss${id}`,
         health: getRandomInt(500, 1000),
         position: { x: levelWidth / 2, y: levelHeight / 2 },
         speed: getRandomInt(0.5, 40),
-        width: getRandomInt(30, 100),
-        height: getRandomInt(30, 100),
+        width: bossSize,
+        height: bossSize,
         color: `rgb(${getRandomInt(0, 255)}, ${getRandomInt(
             0,
             255
