@@ -52,9 +52,9 @@ export const stopSound = (name) => {
  * @returns {Object} - sounds object.
  */
 const sounds = {
-    shoot: loadSound("/sound/fx/shoot.wav"),
-    death: loadSound("/sound/fx/death.wav"),
-    explosion: loadSound("/sound/fx/explosion.wav"),
-    playerDeath: loadSound("/sound/fx/playerDeath.wav"),
-    backgroundSong: loadSound("/sound/music/backgroundSong.wav"),
+    shoot: loadSound("../../../sound/fx/shoot.wav"),
+    death: loadSound("../../../sound/fx/death.wav"),
+    explosion: loadSound("../../../sound/fx/explosion.wav"),
+    playerDeath: loadSound("../../../sound/fx/playerDeath.wav"),
+    backgroundSong: loadSound("../../../sound/music/backgroundSong.wav"),
 };
