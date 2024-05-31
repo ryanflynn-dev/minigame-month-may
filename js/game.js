@@ -714,6 +714,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function initMouseControls() {
         document.removeEventListener("click", handleMouseInput);
         document.addEventListener("click", handleMouseInput);
+
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mousemove", handleMouseMove);
     }
 
     function handleMouseInput(e) {
@@ -745,6 +748,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    let mouseMovePos = { x: 0, y: 0 };
+
+    function handleMouseMove(e) {
+        if (!player) return;
+        const mousePos = getMousePos(canvas, e, camera);
+        mouseMovePos = mousePos;
+    }
+
     // GAME LOOP
 
     function debug() {
@@ -755,7 +766,7 @@ document.addEventListener("DOMContentLoaded", function () {
         enemies.forEach((enemy) => {
             enemy.update(deltatime);
         });
-        player.update(deltatime);
+        player.update(deltatime, mouseMovePos);
         updateParticles(deltatime);
         updateItems(player);
         player.bulletUpdate(deltatime, ctx);
@@ -805,7 +816,6 @@ document.addEventListener("DOMContentLoaded", function () {
         updateGameElements();
         animationFrameId = requestAnimationFrame(animate);
     }
-
     function gameInit() {
         player = new Player({
             name: "player",

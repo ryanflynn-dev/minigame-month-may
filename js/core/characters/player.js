@@ -40,12 +40,32 @@ export class Player extends Character {
         this.angle = 0;
     }
 
-    update(deltatime) {
+    update(deltatime, mouseMovePos) {
         super.update(deltatime);
+        const direction = offsetVector(mouseMovePos, {
+            x: this.position.x + this.width / 2,
+            y: this.position.y + this.height / 2,
+        });
+        const normalisedVector = normaliseVector(direction);
+
+        this.angle = Math.atan2(normalisedVector.y, normalisedVector.x);
     }
 
     draw(ctx) {
-        super.draw(ctx);
+        ctx.save();
+        ctx.translate(
+            this.position.x + this.width / 2,
+            this.position.y + this.height / 2
+        );
+        ctx.rotate(this.angle + Math.PI / 2);
+        ctx.drawImage(
+            this.img,
+            -this.width / 2,
+            -this.height / 2,
+            this.width,
+            this.height
+        );
+        ctx.restore();
     }
 
     bulletUpdate(deltatime, ctx) {
