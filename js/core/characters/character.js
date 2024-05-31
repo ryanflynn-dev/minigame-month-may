@@ -12,6 +12,7 @@ export class Character {
         color,
         damage,
         damagePlus,
+        img,
     }) {
         this.name = name;
         this.health = health;
@@ -26,6 +27,7 @@ export class Character {
         this.damage = damage;
         this.damagePlus = damagePlus;
         this.phase = "normal";
+        this.img = img;
     }
     update(deltatime) {
         this.checkBoundaries();
@@ -59,16 +61,13 @@ export class Character {
     }
 
     draw(ctx) {
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.arc(
-            this.position.x + this.width / 2,
-            this.position.y + this.height / 2,
-            this.width / 2,
-            0,
-            2 * Math.PI
+        ctx.drawImage(
+            this.img,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
         );
-        ctx.fill();
     }
     checkBoundaries() {
         if (this.position.x < 0) {

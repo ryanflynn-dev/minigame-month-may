@@ -67,6 +67,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let enemies = [];
     let phases = ["normal", "fire", "water", "earth", "air"];
 
+    let playerImg = new Image();
+    playerImg.src = "js/assets/art/player-normal.png";
+    let enemyImg = new Image();
+    enemyImg.src = "js/assets/art/enemy-fire.png";
+
     class Enemy extends Character {
         constructor({
             name,
@@ -77,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -91,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: 0.1,
                 damagePlus: 0.4,
+                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
@@ -111,6 +118,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+        }
+        draw(ctx) {
+            super.draw(ctx);
         }
         attack() {
             ctx.strokeStyle = this.color;
@@ -161,6 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -181,6 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.projectiles = [];
             this.interval = 3;
             this.shootTimer = 0;
+            this.img = img;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -194,6 +206,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+        }
+        draw(ctx) {
+            super.draw(ctx);
         }
         projectileUpdate(deltatime) {
             for (let i = 0; i < this.projectiles.length; i++) {
@@ -300,6 +315,7 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -319,6 +335,8 @@ document.addEventListener("DOMContentLoaded", function () {
             this.healingCooldown = 1000;
             this.lastHealTime = Date.now();
             this.healRange = 200;
+
+            this.img = img;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -345,6 +363,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+        }
+        draw(ctx) {
+            super.draw(ctx);
         }
         healEnemy(enemy) {
             ctx.strokeStyle = this.color;
@@ -387,6 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
             damage,
             attackInterval,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -407,6 +429,8 @@ document.addEventListener("DOMContentLoaded", function () {
             this.specialAttackType = specialAttack;
             this.projectiles = [];
             this.specialAttackInterval(this.interval);
+
+            this.img = img;
         }
 
         update(deltatime) {
@@ -422,6 +446,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (getVectorDistance(this.position, player.position) < 300) {
                 this.moveToPlayer();
             }
+        }
+
+        draw(ctx) {
+            super.draw(ctx);
         }
 
         projectileUpdate(deltatime) {
@@ -515,60 +543,65 @@ document.addEventListener("DOMContentLoaded", function () {
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new Enemy({
                 name: "enemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new HealerEnemy({
                 name: "healerEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
         ];
         const randomEnemy =
@@ -777,7 +810,9 @@ document.addEventListener("DOMContentLoaded", function () {
         player = new Player({
             name: "player",
             position: { x: 100, y: 100 },
+            phase: phases[0],
             enemies: enemies,
+            img: playerImg,
         });
         loadLevel(1);
         resetUI(ctx);
@@ -790,7 +825,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function resetGame() {
         stopSound("backgroundSong");
         cancelAnimationFrame(animationFrameId);
-        player = new Player({ name: "player", position: { x: 100, y: 100 } });
+        player = new Player({
+            name: "player",
+            position: { x: 100, y: 100 },
+            phase: phases[0],
+            enemies: enemies,
+            img: playerImg,
+        });
         enemies = [];
         highScore = Math.max(highScore, score);
         score = 0;

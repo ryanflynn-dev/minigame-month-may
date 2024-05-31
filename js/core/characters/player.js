@@ -3,8 +3,20 @@ import { getVectorDistance, normaliseVector, offsetVector } from "../utils.js";
 import { createExplosion } from "../effects/particles.js";
 import { playSound } from "../sound.js";
 
+/**
+ * Player character.
+ *
+ * @extends {Character}
+ * @param {Object} - Player options.
+ * @param {string} - Player name.
+ * @param {Object} - Player position.
+ * @param {string} - Player phase.
+ * @param {Array} - Array of enemies.
+ * @returns {Player}
+ *
+ */
 export class Player extends Character {
-    constructor({ name, position, phase, enemies }) {
+    constructor({ name, position, phase, enemies, img }) {
         super({
             name: name,
             health: 100,
@@ -13,21 +25,27 @@ export class Player extends Character {
             acceleration: { x: 0, y: 0 },
             deceleration: 0.95,
             speed: 5,
-            width: 20,
-            height: 20,
+            width: 40,
+            height: 40,
             color: "white",
             damage: 10,
             damagePlus: 10,
+            img: img,
         });
         this.phase = phase;
         this.phaseCooldown = 1;
         this.lastPhaseShift = 0;
         this.bullets = [];
         this.enemies = enemies;
+        this.angle = 0;
     }
 
     update(deltatime) {
         super.update(deltatime);
+    }
+
+    draw(ctx) {
+        super.draw(ctx);
     }
 
     bulletUpdate(deltatime, ctx) {
