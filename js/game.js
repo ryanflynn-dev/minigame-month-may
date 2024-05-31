@@ -71,6 +71,8 @@ document.addEventListener("DOMContentLoaded", function () {
     playerImg.src = "js/assets/art/player-normal.png";
     let enemyImg = new Image();
     enemyImg.src = "js/assets/art/enemy-fire.png";
+    let bossImg = new Image();
+    bossImg.src = "js/assets/art/boss.png";
 
     class Enemy extends Character {
         constructor({
@@ -186,13 +188,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: 0.1,
                 damagePlus: 0.4,
+                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
             this.projectiles = [];
             this.interval = 3;
             this.shootTimer = 0;
-            this.img = img;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -328,6 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 width: width,
                 height: height,
                 color: color,
+                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
@@ -335,8 +338,6 @@ document.addEventListener("DOMContentLoaded", function () {
             this.healingCooldown = 1000;
             this.lastHealTime = Date.now();
             this.healRange = 200;
-
-            this.img = img;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -408,7 +409,6 @@ document.addEventListener("DOMContentLoaded", function () {
             damage,
             attackInterval,
             phase,
-            img,
         }) {
             super({
                 name: name,
@@ -423,14 +423,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: damage,
                 damagePlus: damage * 2,
+                img: bossImg,
             });
             this.phase = phase;
             this.interval = attackInterval;
             this.specialAttackType = specialAttack;
             this.projectiles = [];
             this.specialAttackInterval(this.interval);
-
-            this.img = img;
         }
 
         update(deltatime) {
