@@ -9,10 +9,12 @@ class Item {
     constructor({ type, position }) {
         this.type = type;
         this.position = position;
-        this.width = 20;
-        this.height = 20;
+        this.width = 40;
+        this.height = 40;
         this.color = "black";
         this.isCollected = false;
+        this.img = new Image();
+        this.img.src = `js/assets/art/${this.type}.png`;
     }
 
     /**
@@ -20,16 +22,13 @@ class Item {
      * @param {CanvasRenderingContext2D} - 2D canvas context.
      */
     draw(ctx) {
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.arc(
-            this.position.x + this.width / 2,
-            this.position.y + this.height / 2,
-            this.width / 2,
-            0,
-            2 * Math.PI
+        ctx.drawImage(
+            this.img,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
         );
-        ctx.fill();
     }
 
     /**

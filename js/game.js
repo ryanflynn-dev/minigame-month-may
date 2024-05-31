@@ -67,6 +67,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let enemies = [];
     let phases = ["normal", "fire", "water", "earth", "air"];
 
+    let playerImg = new Image();
+    playerImg.src = "js/assets/art/player-normal.png";
+    let enemyImg = new Image();
+    enemyImg.src = "js/assets/art/enemy-fire.png";
+    let bossImg = new Image();
+    bossImg.src = "js/assets/art/boss.png";
+
     class Enemy extends Character {
         constructor({
             name,
@@ -77,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -91,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: 0.1,
                 damagePlus: 0.4,
+                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
@@ -111,6 +120,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+        }
+        draw(ctx) {
+            super.draw(ctx);
         }
         attack() {
             ctx.strokeStyle = this.color;
@@ -161,6 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -175,6 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: 0.1,
                 damagePlus: 0.4,
+                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
@@ -194,6 +208,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+        }
+        draw(ctx) {
+            super.draw(ctx);
         }
         projectileUpdate(deltatime) {
             for (let i = 0; i < this.projectiles.length; i++) {
@@ -300,6 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
             height,
             color,
             phase,
+            img,
         }) {
             super({
                 name: name,
@@ -312,6 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 width: width,
                 height: height,
                 color: color,
+                img: img,
             });
             this.phase = phase;
             this.dropChance = 0.5;
@@ -345,6 +364,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+        }
+        draw(ctx) {
+            super.draw(ctx);
         }
         healEnemy(enemy) {
             ctx.strokeStyle = this.color;
@@ -401,6 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: damage,
                 damagePlus: damage * 2,
+                img: bossImg,
             });
             this.phase = phase;
             this.interval = attackInterval;
@@ -422,6 +445,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (getVectorDistance(this.position, player.position) < 300) {
                 this.moveToPlayer();
             }
+        }
+
+        draw(ctx) {
+            super.draw(ctx);
         }
 
         projectileUpdate(deltatime) {
@@ -515,60 +542,65 @@ document.addEventListener("DOMContentLoaded", function () {
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new Enemy({
                 name: "enemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new RangedEnemy({
                 name: "rangedEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
             new HealerEnemy({
                 name: "healerEnemy",
                 health: 100,
                 position: { x: randomX, y: randomY },
                 speed: Math.random() * 30 + 20,
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: "white",
                 phase: phases[
                     Math.floor(Math.random() * (phases.length - 1)) + 1
                 ],
+                img: enemyImg,
             }),
         ];
         const randomEnemy =
@@ -681,6 +713,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function initMouseControls() {
         document.removeEventListener("click", handleMouseInput);
         document.addEventListener("click", handleMouseInput);
+
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mousemove", handleMouseMove);
     }
 
     function handleMouseInput(e) {
@@ -712,6 +747,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    let mouseMovePos = { x: 0, y: 0 };
+
+    function handleMouseMove(e) {
+        if (!player) return;
+        const mousePos = getMousePos(canvas, e, camera);
+        mouseMovePos = mousePos;
+    }
+
     // GAME LOOP
 
     function debug() {
@@ -722,7 +765,7 @@ document.addEventListener("DOMContentLoaded", function () {
         enemies.forEach((enemy) => {
             enemy.update(deltatime);
         });
-        player.update(deltatime);
+        player.update(deltatime, mouseMovePos);
         updateParticles(deltatime);
         updateItems(player);
         player.bulletUpdate(deltatime, ctx);
@@ -772,12 +815,13 @@ document.addEventListener("DOMContentLoaded", function () {
         updateGameElements();
         animationFrameId = requestAnimationFrame(animate);
     }
-
     function gameInit() {
         player = new Player({
             name: "player",
             position: { x: 100, y: 100 },
+            phase: phases[0],
             enemies: enemies,
+            img: playerImg,
         });
         loadLevel(1);
         resetUI(ctx);
@@ -790,7 +834,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function resetGame() {
         stopSound("backgroundSong");
         cancelAnimationFrame(animationFrameId);
-        player = new Player({ name: "player", position: { x: 100, y: 100 } });
+        player = new Player({
+            name: "player",
+            position: { x: 100, y: 100 },
+            phase: phases[0],
+            enemies: enemies,
+            img: playerImg,
+        });
         enemies = [];
         highScore = Math.max(highScore, score);
         score = 0;
