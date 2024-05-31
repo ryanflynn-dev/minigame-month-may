@@ -16,7 +16,7 @@ import { playSound } from "../sound.js";
  *
  */
 export class Player extends Character {
-    constructor({ name, position, phase, enemies, img }) {
+    constructor({ name, position, phase, enemies }) {
         super({
             name: name,
             health: 100,
@@ -30,7 +30,6 @@ export class Player extends Character {
             color: "white",
             damage: 10,
             damagePlus: 10,
-            img: img,
         });
         this.phase = phase;
         this.phaseCooldown = 1;
@@ -38,6 +37,8 @@ export class Player extends Character {
         this.bullets = [];
         this.enemies = enemies;
         this.angle = 0;
+        this.img = new Image();
+        this.img.src = `js/assets/art/player-${this.phase}.png`;
     }
 
     update(deltatime, mouseMovePos) {
@@ -49,6 +50,7 @@ export class Player extends Character {
         const normalisedVector = normaliseVector(direction);
 
         this.angle = Math.atan2(normalisedVector.y, normalisedVector.x);
+        this.img.src = `js/assets/art/player-${this.phase}.png`;
     }
 
     draw(ctx) {
