@@ -9,9 +9,39 @@
             <div id="loader" class="loader">
                 <h1>Loading...</h1>
             </div>
+            <div id="story-container">
+                <div id="story-text"></div>
+                <div id="story-image"></div>
+                <button id="story-button">Next</button>
+            </div>
             <div id="title-screen" class="title-screen">
-                <h1>(!game)</h1>
+                <h1>(!game) Wizard's Space Adventure!</h1>
                 <button id="start-game">Start</button>
+                <button id="show-how-to-play">How to Play</button>
+                <div id="how-to-play">
+                    <h2>How to Play</h2>
+                    <p>
+                        Welcome to Wizard's Space Adventure! Here's how you can
+                        control Alaric and his spaceship:
+                    </p>
+                    <ul id="controls">
+                        <li>
+                            <strong>Move:</strong> Use <kbd>W</kbd>,
+                            <kbd>A</kbd>, <kbd>S</kbd>, <kbd>D</kbd> or the
+                            arrow keys to move your spaceship.
+                        </li>
+                        <li>
+                            <strong>Shoot:</strong> Point and click with your
+                            mouse to shoot at enemies.
+                        </li>
+                        <li>
+                            <strong>Phase Shift:</strong> Press <kbd>E</kbd> to
+                            phase shift. This will change your color, making you
+                            immune to enemies of the same color.
+                        </li>
+                    </ul>
+                    <button id="start-game">Start Game</button>
+                </div>
             </div>
             <div id="app" class="app">
                 <canvas
