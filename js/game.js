@@ -34,11 +34,63 @@ document.addEventListener("DOMContentLoaded", function () {
     const app = document.getElementById("app");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+    const storyContainer = document.getElementById("story-container");
+    const storyText = document.getElementById("story-text");
+    const storyImage = document.getElementById("story-image");
+    const nextButton = document.getElementById("story-button");
+    const showHowToPlayButton = document.getElementById("show-how-to-play");
+    const howToPlaySection = document.getElementById("how-to-play");
+
+    const storyData = [
+        {
+            text: "In a mystical realm, there lived a powerful wizard named Alaric. He was known for his wisdom and mastery over the elements.",
+            image: "images/wizard.jpg",
+        },
+        {
+            text: "One day, a strange celestial event occurred. A portal opened in the sky, revealing a fleet of alien ships threatening their world.",
+            image: "images/portal.jpg",
+        },
+        {
+            text: "To defend his realm, Alaric used his magic to create a spaceship, merging ancient sorcery with advanced technology.",
+            image: "images/spaceship.jpg",
+        },
+        {
+            text: "With his new spaceship, Alaric set off to battle the alien invaders, determined to protect his world from this new threat.",
+            image: "images/space_battle.jpg",
+        },
+    ];
+
+    let currentStep = 0;
+
+    function showStoryStep(step) {
+        if (step < storyData.length) {
+            storyText.innerHTML = storyData[step].text;
+            storyImage.src = storyData[step].image;
+        } else {
+            storyContainer.style.display = "none";
+            titleScreen.style.display = "flex";
+            loader.style.display = "none";
+        }
+    }
+
+    nextButton.addEventListener("click", () => {
+        currentStep++;
+        showStoryStep(currentStep);
+    });
+
+    loader.style.display = "flex";
 
     setTimeout(() => {
         loader.style.display = "none";
-        titleScreen.style.display = "flex";
+        storyContainer.style.display = "block";
+        showStoryStep(currentStep);
     }, 3000);
+
+    showHowToPlayButton.addEventListener("click", () => {
+        if (howToPlaySection.style.display === "none")
+            howToPlaySection.style.display = "block";
+        else howToPlaySection.style.display = "none";
+    });
 
     startButton.addEventListener("click", () => {
         titleScreen.style.display = "none";
@@ -98,6 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.dropChance = 0.5;
             this.img = new Image();
             this.img.src = `js/assets/art/enemy-${this.phase}.png`;
+            this.angle = 0;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -115,9 +168,27 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+
+            this.angle = Math.atan2(
+                player.position.y - this.position.y,
+                player.position.x - this.position.x
+            );
         }
         draw(ctx) {
-            super.draw(ctx);
+            ctx.save();
+            ctx.translate(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2
+            );
+            ctx.rotate(this.angle + Math.PI / 2);
+            ctx.drawImage(
+                this.img,
+                -this.width / 2,
+                -this.height / 2,
+                this.width,
+                this.height
+            );
+            ctx.restore();
         }
         attack() {
             ctx.strokeStyle = this.color;
@@ -190,6 +261,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.shootTimer = 0;
             this.img = new Image();
             this.img.src = `js/assets/art/Renemy-${this.phase}.png`;
+            this.angle = 0;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -203,9 +275,27 @@ document.addEventListener("DOMContentLoaded", function () {
             if (this.health <= 0) {
                 this.handleDeath();
             }
+
+            this.angle = Math.atan2(
+                player.position.y - this.position.y,
+                player.position.x - this.position.x
+            );
         }
         draw(ctx) {
-            super.draw(ctx);
+            ctx.save();
+            ctx.translate(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2
+            );
+            ctx.rotate(this.angle + Math.PI / 2);
+            ctx.drawImage(
+                this.img,
+                -this.width / 2,
+                -this.height / 2,
+                this.width,
+                this.height
+            );
+            ctx.restore();
         }
         projectileUpdate(deltatime) {
             for (let i = 0; i < this.projectiles.length; i++) {
@@ -332,7 +422,8 @@ document.addEventListener("DOMContentLoaded", function () {
             this.lastHealTime = Date.now();
             this.healRange = 200;
             this.img = new Image();
-            this.img.src = `js/assets/art/Henemy1.png`;
+            this.img.src = `js/assets/art/Henemy-${this.phase}.png`;
+            this.angle = 0;
         }
         update(deltatime) {
             super.update(deltatime);
@@ -347,9 +438,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         enemy.phase === this.phase &&
                         enemy.health < 100
                     ) {
-                        console.log("healing" + enemy.health);
                         this.healEnemy(enemy);
-                        console.log("healing" + enemy.health);
+                        this.angle = Math.atan2(
+                            enemy.position.y - this.position.y,
+                            enemy.position.x - this.position.x
+                        );
 
                         this.lastHealTime = currentTime;
                     }
@@ -361,7 +454,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         draw(ctx) {
-            super.draw(ctx);
+            ctx.save();
+            ctx.translate(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2
+            );
+            ctx.rotate(this.angle + Math.PI / 2);
+            ctx.drawImage(
+                this.img,
+                -this.width / 2,
+                -this.height / 2,
+                this.width,
+                this.height
+            );
+            ctx.restore();
         }
         healEnemy(enemy) {
             ctx.strokeStyle = this.color;
@@ -425,6 +531,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.specialAttackType = specialAttack;
             this.projectiles = [];
             this.specialAttackInterval(this.interval);
+            this.angle = 0;
         }
 
         update(deltatime) {
@@ -440,10 +547,28 @@ document.addEventListener("DOMContentLoaded", function () {
             if (getVectorDistance(this.position, player.position) < 300) {
                 this.moveToPlayer();
             }
+
+            this.angle = Math.atan2(
+                player.position.y - this.position.y,
+                player.position.x - this.position.x
+            );
         }
 
         draw(ctx) {
-            super.draw(ctx);
+            ctx.save();
+            ctx.translate(
+                this.position.x + this.width / 2,
+                this.position.y + this.height / 2
+            );
+            ctx.rotate(this.angle + Math.PI / 2);
+            ctx.drawImage(
+                this.img,
+                -this.width / 2,
+                -this.height / 2,
+                this.width,
+                this.height
+            );
+            ctx.restore();
         }
 
         projectileUpdate(deltatime) {
@@ -698,6 +823,17 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
+    const floorTile = new Image();
+    floorTile.src = "js/assets/art/floor.png";
+
+    function renderFloor(ctx, levelWidth, levelHeight, tileWidth, tileHeight) {
+        for (let x = 0; x < levelWidth; x += tileWidth) {
+            for (let y = 0; y < levelHeight; y += tileHeight) {
+                ctx.drawImage(floorTile, x, y, tileWidth, tileHeight);
+            }
+        }
+    }
+
     // CONTROLS
 
     function initMouseControls() {
@@ -793,6 +929,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
         ctx.translate(-camera.position.x, -camera.position.y);
+        renderFloor(ctx, worldWidth, worldHeight, 64, 64);
         updateEntities(deltatime);
         drawEntites(ctx);
         debug();
