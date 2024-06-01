@@ -34,11 +34,70 @@ document.addEventListener("DOMContentLoaded", function () {
     const app = document.getElementById("app");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+    const storyContainer = document.getElementById("story-container");
+    const storyText = document.getElementById("story-text");
+    const storyImage = document.getElementById("story-image");
+    const nextButton = document.getElementById("story-button");
+    const showHowToPlayButton = document.getElementById("show-how-to-play");
+    const howToPlaySection = document.getElementById("how-to-play");
+    const showCreditsButton = document.getElementById("show-credits");
+    const creditsSection = document.getElementById("credits");
+
+    const storyData = [
+        {
+            text: "In a mystical realm, there lived a powerful wizard named Alaric. He was known for his wisdom and mastery over the elements.",
+            image: "js/assets/art/wizard.png",
+        },
+        {
+            text: "One day, a strange celestial event occurred. A portal opened in the sky, revealing a fleet of alien ships threatening their world.",
+            image: "js/assets/art/portal.png",
+        },
+        {
+            text: "To defend his realm, Alaric used his magic to create a spaceship, merging ancient sorcery with advanced technology.",
+            image: "js/assets/art/spaceship.png",
+        },
+        {
+            text: "With his new spaceship, Alaric set off to battle the alien invaders, determined to protect his world from this new threat.",
+            image: "js/assets/art/space_battle.png",
+        },
+    ];
+
+    let currentStep = 0;
+
+    function showStoryStep(step) {
+        if (step < storyData.length) {
+            storyText.innerHTML = storyData[step].text;
+            storyImage.src = storyData[step].image;
+        } else {
+            storyContainer.style.display = "none";
+            titleScreen.style.display = "flex";
+            loader.style.display = "none";
+        }
+    }
+
+    nextButton.addEventListener("click", () => {
+        currentStep++;
+        showStoryStep(currentStep);
+    });
+
+    loader.style.display = "flex";
 
     setTimeout(() => {
         loader.style.display = "none";
         titleScreen.style.display = "flex";
     }, 3000);
+
+    showHowToPlayButton.addEventListener("click", () => {
+        if (howToPlaySection.style.display === "none")
+            howToPlaySection.style.display = "block";
+        else howToPlaySection.style.display = "none";
+    });
+
+    showCreditsButton.addEventListener("click", () => {
+        if (creditsSection.style.display === "none")
+            creditsSection.style.display = "block";
+        else creditsSection.style.display = "none";
+    });
 
     startButton.addEventListener("click", () => {
         titleScreen.style.display = "none";
