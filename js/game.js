@@ -532,7 +532,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: color,
                 damage: damage,
                 damagePlus: damage * 2,
-                img: bossImg,
             });
             this.phase = phase;
             this.interval = attackInterval;
@@ -540,6 +539,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.projectiles = [];
             this.specialAttackInterval(this.interval);
             this.angle = 0;
+            this.img = bossImg;
         }
 
         update(deltatime) {
