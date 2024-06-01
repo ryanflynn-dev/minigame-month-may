@@ -28,7 +28,7 @@ html {
 }
 
 .loader {
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
 }
@@ -40,9 +40,6 @@ html {
     flex-direction: column;
 }
 
-<<<<<<< Updated upstream
-button {
-=======
 #story-container {
     display: none;
     position: absolute;
@@ -101,7 +98,6 @@ button {
 #show-credits,
 #show-how-to-play,
 #start-game {
->>>>>>> Stashed changes
     background-color: #ff7300;
     border: none;
     color: #fff;
